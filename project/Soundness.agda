@@ -25,18 +25,9 @@ open import Renaming G O
 open import Substitution G O
 open import Interpreter-Substitution G O
 open import Interpreter-Renaming G O
+open import Monads G O
  
-tree-id : ∀ {X Σ} (t : Tree Σ ⟦ X ⟧v)
-    → bind-tree leaf t ≡ t
-tree-id {X} {Σ} (leaf x) = refl
-tree-id {X} {Σ} (node op p param t) = cong (node op p param) 
-    (fun-ext (λ res → tree-id {X = X} {Σ = Σ} (t res)))
 
-bind-tree-assoc : {Σ : Sig} {X Y Z : Set} (c : Tree Σ X) (f : X → Tree Σ Y)
-    (g : Y → Tree Σ Z) →
-    bind-tree g (bind-tree f c) ≡ bind-tree (λ x → bind-tree g (f x)) c
-bind-tree-assoc (leaf x) f g = refl
-bind-tree-assoc (node op p param c) f g = cong (node op p param) (fun-ext (λ res → bind-tree-assoc (c res) f g))
 
 mutual
 
@@ -128,12 +119,12 @@ mutual
                     (⟦ m ⟧-user (η , x)) C'
               })
            (⟦ R op p ⟧-kernel (η , ⟦ param' ⟧-value η) (⟦ w ⟧-value η)))
-        ≡⟨ bind-tree-assoc 
-            (⟦ R op p ⟧-kernel (η , ⟦ param' ⟧-value η) (⟦ w ⟧-value η)) 
+        ≡⟨ >>=-assoc-Tree {Σ = Σ} {l = lzero}
+            (⟦ R op p ⟧-kernel (η , ⟦ param' ⟧-value η) (⟦ w ⟧-value η))
             (λ { (x , C')
               → apply-runner (λ op₁ x₁ param₁ → ⟦ R op₁ x₁ ⟧-kernel (η , param₁))
                 (⟦ m ⟧-user (η , x)) C'})
-            (λ { (x , c') → ⟦ n ⟧-user ((η , x) , c') }) ⟩
+            (λ { (x , c') → ⟦ n ⟧-user ((η , x) , c') }) ⟩ 
         bind-tree
           (λ (res , C₁) →
              bind-tree (λ { (x , c') → ⟦ n ⟧-user ((η , x) , c') })
@@ -382,7 +373,7 @@ mutual
         bind-tree (λ X₁ → leaf X₁) (⟦ n ⟧-user η)
         ≡⟨ (Eq.cong-app {f = bind-tree (λ X₁ → leaf X₁) } {g = bind-tree leaf} refl (⟦ n ⟧-user η)) ⟩
         bind-tree leaf (⟦ n ⟧-user η)
-        ≡⟨ tree-id {X = X} {Σ = Σ} (⟦ n ⟧-user η) ⟩
+        ≡⟨ η-right-Tree {Σ = Σ} {l = lzero} (⟦ n ⟧-user η) ⟩
         ⟦ n ⟧-user η
         ∎
     valid-K refl η = Eq.refl
@@ -488,7 +479,7 @@ mutual
         ≡⟨ (Eq.cong-app {f = bind-tree (λ { (x , C') → leaf (x , C') }) } 
             {g = bind-tree leaf} refl (⟦ l ⟧-kernel η x)) ⟩
         bind-tree leaf ((⟦ l ⟧-kernel η x))
-        ≡⟨ tree-id {X = X ×v gnd C} {Σ = Σ} ((⟦ l ⟧-kernel η x)) ⟩
+        ≡⟨ η-right-Tree {Σ = Σ} {l = lzero} (⟦ l ⟧-kernel η x) ⟩
         ⟦ l ⟧-kernel η x
         ∎) 
     valid-K (GetSetenv k) η = 
@@ -557,3 +548,4 @@ mutual
                         (ren-wk idᵣ η)))
                     (ren-value param there (η , res))))))       
 
+ 

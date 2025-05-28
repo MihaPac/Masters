@@ -63,6 +63,19 @@ bind-tree f (node op p param c) = node op p param (λ res → bind-tree f (c res
 map-tree : ∀ {Σ X Y} → (X → Y) → Tree Σ X → Tree Σ Y
 map-tree f t = bind-tree (leaf ∘ f) t
 
+--The monad laws for trees (missing one law, but the one that's trivial)
+tree-id : ∀ {X Σ} (t : Tree Σ X)
+    → bind-tree leaf t ≡ t
+tree-id {X} {Σ} (leaf x) = refl
+tree-id {X} {Σ} (node op p param t) = cong (node op p param) 
+    (fun-ext (λ res → tree-id {X = X} {Σ = Σ} (t res)))
+
+bind-tree-assoc : {Σ : Sig} {X Y Z : Set} (c : Tree Σ X) (f : X → Tree Σ Y)
+    (g : Y → Tree Σ Z) →
+    bind-tree g (bind-tree f c) ≡ bind-tree (λ x → bind-tree g (f x)) c
+bind-tree-assoc (leaf x) f g = refl
+bind-tree-assoc (node op p param c) f g = cong (node op p param) (fun-ext (λ res → bind-tree-assoc (c res) f g))
+
 -- Denotation of a user computation returning elements of X and performing operations Σ
 UComp : Sig → Set → Set
 UComp Σ X = Tree Σ X --TODO: Prove that THIS/Tree(X) is a Monad, the UComp will be T, bind is the bind-tree, leaf is the unit η,

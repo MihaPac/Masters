@@ -11,7 +11,6 @@ open Ops O
 -- Kernel state type
 KState = GType
 
-
 interleaved mutual
   data VType : Set
   data UType : Set

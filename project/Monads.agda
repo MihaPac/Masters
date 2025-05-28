@@ -28,7 +28,7 @@ open import Trees G O
 
 record Monad {l} : Set (lsuc l) where
   field
-    -- carrier (object map) fo the Kleisli triple
+    -- carrier (object map) for the Kleisli triple
     T       : Set → Set
     -- unit
     η       : {X : Set} → X → T X
