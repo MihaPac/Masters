@@ -1,5 +1,4 @@
 open import Data.Bool
-open import Data.Nat
 open import Relation.Binary.PropositionalEquality
 
 module Parameters where
