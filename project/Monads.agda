@@ -88,14 +88,3 @@ KMonad C = record {
     >>=-assoc-Kernel : {X Y Z : Set} (K : KComp Σ C X) (f : X → KComp Σ C Y) (g : Y → KComp Σ C Z)
       → bind-kernel g (bind-kernel f K) ≡ bind-kernel (λ x → bind-kernel g (f x)) K
     >>=-assoc-Kernel K f g = fun-ext (λ c → >>=-assoc-Tree (K c) (λ { (x , c') → f x c' }) (λ { (y , c') → g y c' }))
-
-
---TODOs for next time (17. 12. 2024)
---1. Split Denotations.agda into 2 files, one file has all definitions regarding Monads, the other has the ⟦ ⟧ stuff, except the ⟦ ⟧g stuff (which goes with Monads).
---2. Use consistent fixed variable names. Then keep it consistent forevermore.
---3. Finish the definitions of the ⟦ ⟧-kernel and ⟦ ⟧-user
---- ^What is expected^ --
---3.5. Rewrite the ⟦ ⟧ stuff to use the Monad structure
---4. getenv, setenv and the equations they use (for the Kernel Monad), algebraic operations, algebraicity equation (for both monads)
---Optional: Read the literature already given. Most important is that the Runners paper is understood as much as possible, the rest is simply background reading to understand that.
---Keep track of things you do not understand. Danel's thesis will be useful for HOW to write your own thesis. The MFPS2013 paper will also be useful.

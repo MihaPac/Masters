@@ -37,7 +37,7 @@ open import Trees G O
 
 
 
-mutual --TODO: This should go into a different module/file. Essentially putting the monads in one and the ⟦ ⟧ stuff into another file.
+mutual
   -- Denotation of value types
 
   ⟦_⟧v : VType → Set
@@ -79,7 +79,7 @@ lookup (there p) η = lookup p (proj₁ η)
 
 mutual
   -- Denotation of value subtyping
-  coerceᵥ : ∀ {t u} → t ⊑ᵥ u → ⟦ t ⟧v → ⟦ u ⟧v
+  coerceᵥ : ∀ {X Y} → X ⊑ᵥ Y → ⟦ X ⟧v → ⟦ Y ⟧v
   coerceᵥ ⊑ᵥ-ground A = A
   coerceᵥ (⊑ᵥ-product p q) (X , Y) = (coerceᵥ p X , coerceᵥ q Y)
   coerceᵥ (⊑ᵥ-Ufun p q) f = λ X' → coerceᵤ q (f (coerceᵥ p X'))
@@ -87,7 +87,7 @@ mutual
   coerceᵥ (⊑ᵥ-runner p q refl) r = λ op p' param C → include-tree q (r op (p _ p') param C) -- TODO: Make the first argument of p implicit
 
   -- Denotation of user computation subtyping
-  coerceᵤ : ∀ {X Y} → X ⊑ᵤ Y → ⟦ X ⟧u → ⟦ Y ⟧u
+  coerceᵤ : ∀ {Xᵤ Yᵤ} → Xᵤ ⊑ᵤ Yᵤ → ⟦ Xᵤ ⟧u → ⟦ Yᵤ ⟧u
   coerceᵤ (⊑ᵤ-user p q) M = include-tree q (map-tree (coerceᵥ p) M)
 
   -- Denotation of kernel computation subtyping
@@ -125,7 +125,6 @@ mutual
   ⟦ match v `with m ⟧-user η = ⟦ m ⟧-user ((η , (proj₁ (⟦ v ⟧-value η))) , (proj₂ (⟦ v ⟧-value η)))
   ⟦ `using r at c `run m finally n ⟧-user η =
      kernel-to-user (apply-runner (⟦ r ⟧-value η) (⟦ m ⟧-user η)) (⟦ c ⟧-value η) (λ { (x , c') → ⟦ n ⟧-user ((η , x) , c')})
-
   ⟦ kernel k at c finally m ⟧-user η = kernel-to-user  (⟦ k ⟧-kernel η) (⟦ c ⟧-value η) (λ {(X , C) → ⟦ m ⟧-user ((η , X) , C)})
 
   ⟦_⟧-kernel : ∀ {Γ K} → (Γ ⊢K: K) → ⟦ Γ ⟧-ctx → ⟦ K ⟧k
@@ -138,18 +137,3 @@ mutual
   ⟦ getenv k ⟧-kernel η C = ⟦ k ⟧-kernel (η , C) C
   ⟦ setenv v k ⟧-kernel η _ = ⟦ k ⟧-kernel η (⟦ v ⟧-value η)
   ⟦ user m `with k ⟧-kernel η C = bind-user (λ X → ⟦ k ⟧-kernel (η , X) C) (⟦ m ⟧-user η)
-  --⟦ K ⟧-kernel (η , {! ⟦ ? ⟧-user  !}) C
-
-
-
---TODOs for next time (17. 12. 2024)
---1. Split Denotations.agda into 2 files, one file has all definitions regarding Monads, the other has the ⟦ ⟧ stuff, except the ⟦ ⟧g stuff (which goes with Monads). DONE
---2. Use consistent fixed variable names. Then keep it consistent forevermore. DONE
---3. Finish the definitions of the ⟦ ⟧-kernel and ⟦ ⟧-user
---- ^What is expected^ --
---3.5. Rewrite the ⟦ ⟧ stuff to use the Monad structure
---4. getenv, setenv and the equations they use (for the Kernel Monad), algebraic operations, algebraicity equation (for both monads)
---Optional: Read the literature already given. Most important is that the Runners paper is understood as much as possible, the rest is simply background reading to understand that.
---Keep track of things you do not understand. Danel's thesis will be useful for HOW to write your own thesis. The MFPS2013 paper will also be useful.
-
- 

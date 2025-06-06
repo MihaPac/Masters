@@ -12,7 +12,7 @@ open import Parameters
 import Types
 import Terms
 
-module Trees (G : GTypes) (O : Ops G) where --TODO: Organize things into separate files (17. 12. 2024)
+module Trees (G : GTypes) (O : Ops G) where
 
 open import Level        renaming (zero to lzero; suc to lsuc)
 open import Axiom.Extensionality.Propositional using (Extensionality)
@@ -25,19 +25,6 @@ open Contexts G O
 open Types G O
 open Terms G O
 
--- GENERAL TODO: naming conventions (think for yourself what to do, try to stay close to the paper/thesis)
--- - upper-case letters for types, lower-case letters for terms
--- - use X, Y, Z for value types
--- - use A, B, C for ground types
--- - something for base types? (could be 'b')
--- - use Xᵤ, Yᵤ, Zᵤ for user types
--- - use Xₖ, Yₖ, Zₖ  for kernel types
-
--- Trees are t, u, ...
--- UComps are M, N, ...
--- KComps are K, L, ...
-
--- Denotation of ground types TODO: daj v primerno datoteko
 ⟦_⟧g : GType → Set
 ⟦ base b ⟧g =  ⟦ b ⟧b
 ⟦ unit ⟧g = ⊤

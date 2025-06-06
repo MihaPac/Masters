@@ -71,7 +71,7 @@ interleaved mutual
   rename-runner R ρ op p = rename-coop (R op p) ρ
 
   var p [ ρ ]ᵥᵣ = var (ρ p)
-  sub-value v p [ ρ ]ᵥᵣ = sub-value ( v [ ρ ]ᵥᵣ) p --TODO: Ask if p for proof of inclusion is appropriate - perhaps rel? For relation?
+  sub-value v p [ ρ ]ᵥᵣ = sub-value ( v [ ρ ]ᵥᵣ) p
   ⟨⟩ [ ρ ]ᵥᵣ = ⟨⟩
   ⟨ v , w ⟩ [ ρ ]ᵥᵣ = ⟨  v [ ρ ]ᵥᵣ , w [ ρ ]ᵥᵣ ⟩
   (funU m) [ ρ ]ᵥᵣ = funU (m [ extdᵣ ρ ]ᵤᵣ) -- EXPLANATION: We know that ρ won't change the funU constructor, so we can simply use the action of ρ on M

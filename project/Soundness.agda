@@ -55,7 +55,7 @@ mutual
                     (ren-wk idᵣ η)))
                 (ren-value w wkᵣ (η , x))))
             refl)
-    valid-V {w = w} funK-eta η = fun-ext (λ X → 
+    valid-V {Γ} {X} {Xₖ} {w = w} funK-eta η = fun-ext (λ X → 
         cong₂ (λ a b → a b) 
             {x = ⟦ w [ (λ x₁ → there x₁) ]ᵥᵣ ⟧-value (η , X)}
             {y = ⟦ w ⟧-value η}
@@ -65,20 +65,35 @@ mutual
                     (ren-wk idᵣ η)))
                 (ren-value w wkᵣ (η , X))))
             refl)
+            {-Eq.sym (Eq.trans 
+        (cong ⟦ w ⟧-value (Eq.trans 
+            (ren-id-lemma η) 
+            (ren-wk idᵣ η))) 
+        (ren-value {! Xₖ  !} wkᵣ (η , {!   !})))
+        TODO: Is it possible to do it without having to add a variable?-}
 
     valid-U refl η = Eq.refl
     valid-U (sym eq-m) η = Eq.sym (valid-U eq-m η) 
     valid-U (trans eq-m eq-n) η = Eq.trans (valid-U eq-m η) (valid-U eq-n η) 
     valid-U (return-cong eq-v) η = Eq.cong (λ x → leaf x) (valid-V eq-v η)
-    valid-U {Γ} {Xᵤ} {m} {n} (·-cong eq-v eq-w) η = cong₂ (λ v-value w-value → v-value w-value) (valid-V eq-v η) (valid-V eq-w η)
+    valid-U {Γ} {Xᵤ} {m} {n} (·-cong eq-v eq-w) η = 
+        cong₂ (λ v-value w-value → v-value w-value) 
+            (valid-V eq-v η) 
+            (valid-V eq-w η)
     valid-U (opᵤ-cong p eq-v eq-m) η = cong₂ (node _ p) (valid-V eq-v η) (fun-ext (λ res → valid-U eq-m (η , res))) 
     valid-U (let-in-cong eq-m eq-n) η = cong₂ bind-user (fun-ext (λ x → valid-U eq-n (η , x))) (valid-U eq-m η)
     valid-U (match-with-cong eq-v eq-m) η = cong₂ (λ m η' → m η') (fun-ext (λ η' → valid-U eq-m η')) (cong (λ x → ( η , proj₁ x) , proj₂ x) (valid-V eq-v η))
     valid-U (using-at-run-finally-cong eq-r eq-w eq-m eq-n) η = 
         cong₂ bind-tree (fun-ext (λ η' → valid-U eq-n ((η , proj₁ η') , proj₂ η') ))  
-            (cong₂ (λ r,m w → apply-runner (proj₁ r,m) (proj₂ r,m) w)  (cong₂ (λ r m → r , m)  (valid-V eq-r η) (valid-U eq-m η)) (valid-V eq-w η))
+            (cong₂ (λ r,m w → apply-runner (proj₁ r,m) (proj₂ r,m) w)  
+                (cong₂ (λ r m → r , m)  (valid-V eq-r η) (valid-U eq-m η)) 
+                (valid-V eq-w η))
     valid-U (kernel-at-finally-cong eq-v eq-m eq-k) η = 
-        cong₂ bind-tree (fun-ext (λ x → valid-U eq-m ((η , proj₁ x) , proj₂ x))) (cong₂ (λ k c → k c ) (valid-K eq-k η) (valid-V eq-v η))
+        cong₂ bind-tree 
+            (fun-ext (λ x → valid-U eq-m ((η , proj₁ x) , proj₂ x))) 
+            (cong₂ (λ k c → k c ) 
+                (valid-K eq-k η) 
+                (valid-V eq-v η))
     valid-U (funU-beta m v) η = Eq.trans (cong ⟦ m ⟧-user (cong₂ _,_ (sub-id-lemma η) refl)) (sub-U (var ∷ₛ v) η m)
     valid-U (let-in-beta-return_ v m) η = Eq.trans (cong ⟦ m ⟧-user (cong₂ _,_ (sub-id-lemma η) refl)) (sub-U (var ∷ₛ v) η m)
     --{X Y : VType} {Σ : Sig} for let-in-beta-op
@@ -376,6 +391,7 @@ mutual
         ≡⟨ η-right-Tree {Σ = Σ} {l = lzero} (⟦ n ⟧-user η) ⟩
         ⟦ n ⟧-user η
         ∎
+
     valid-K refl η = Eq.refl
     valid-K (sym eq-k) η = Eq.sym (valid-K eq-k η)
     valid-K (trans eq-k eq-l) η = Eq.trans (valid-K eq-k η) (valid-K eq-l η) 
@@ -384,10 +400,13 @@ mutual
     valid-K (let-in-cong eq-k eq-l) η = 
         fun-ext (λ c → cong₂ bind-tree (fun-ext (λ x → cong (λ x₁ → x₁ (proj₂ x)) (valid-K eq-l (η , proj₁ x) )) )  (cong₂ (λ a b → a b) (valid-K eq-k η) refl) )
     valid-K (match-with-cong eq-v eq-k) η = cong₂ (λ k v → k v) (fun-ext (λ η' → valid-K eq-k η' )) (cong (λ v → (( η , proj₁ v ) , proj₂ v)) (valid-V eq-v η))
-    valid-K (opₖ-cong {V} {W} {Σ} {C} {op} {p} {param} eq-v eq-k) η = fun-ext (λ _ → cong₂ (node op p) (valid-V eq-v η) (fun-ext (λ res → cong₂ (λ k≡k' c → k≡k' c) (valid-K eq-k (η , res))  refl ))) 
-    --TODO 28. 01. : change the names of these variables to be appropriate to what they represent
+    valid-K (opₖ-cong {V} {W} {Σ} {C} {op} {p} {param} eq-v eq-k) η = 
+        fun-ext (λ _ → cong₂ (node op p) 
+            (valid-V eq-v η) 
+            (fun-ext (λ res → cong₂ (λ k≡k' c → k≡k' c) 
+                (valid-K eq-k (η , res))  
+                refl ))) 
     valid-K (getenv-cong eq-k) η = fun-ext (λ c → cong₂ (λ k≡k' c' → k≡k' c') (valid-K eq-k (η , c)) refl)
-    --TODO 28. 01. : change the names of these variables to be appropriate to what they represent
     valid-K (setenv-cong eq-v eq-k) η = fun-ext (λ _ → cong₂ (λ k c → k c) (valid-K eq-k η) (valid-V eq-v η)) 
     valid-K (user-with-cong eq-m eq-k) η = fun-ext (λ _ → cong₂ bind-tree (cong₂ (λ f c x → f x c) (fun-ext (λ x → valid-K eq-k (η , x) ))  refl) (valid-U eq-m η))  
     valid-K (funK-beta k v) η = Eq.trans 

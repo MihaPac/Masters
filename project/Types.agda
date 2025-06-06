@@ -35,7 +35,7 @@ interleaved mutual
 
 -- Subtyping relations
 _⊆ₛ_ : Sig → Sig → Set
-Σ ⊆ₛ Σ' = (op : Op) → Σ op ≡ true → Σ' op ≡ true -- TODO; can we make op implicit?
+Σ ⊆ₛ Σ' = (op : Op) → Σ op ≡ true → Σ' op ≡ true
 
 _≡ₖ_ : KState → KState → Set
 C ≡ₖ C' = C ≡ C'
@@ -59,7 +59,6 @@ interleaved mutual
 
 
     ⊑ᵥ-Ufun : {X X' : VType} {Σ Σ' : UType}
-    --TODO: Contemplate this one
                 → X' ⊑ᵥ X
                 → Σ ⊑ᵤ Σ'
                 -----------------------

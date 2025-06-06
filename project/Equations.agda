@@ -187,7 +187,7 @@ interleaved mutual
       -------------------------------
       → Γ ⊢U (funU m) · v ≡ (m [ idₛ ∷ₛ v ]ᵤ)
 
-    let-in-beta-return_ : {X Y : VType} {Σ : Sig} --TODO: Check if Y ! Σ or Xᵤ as a UType preferable here
+    let-in-beta-return_ : {X Y : VType} {Σ : Sig}
       → (v : Γ ⊢V: X)
       → (m : Γ ∷ X ⊢U: Y ! Σ)
       ----------------------------
@@ -377,7 +377,7 @@ interleaved mutual
       -------------------
       → Γ ⊢K (funK k) · v ≡ (k [ idₛ ∷ₛ v ]ₖ)
 
-    let-in-beta-return : {X Y : VType} --TODO: double-check this
+    let-in-beta-return : {X Y : VType}
       {Σ : Sig} {C : KState}
       → (v : Γ ⊢V: X)
       → (k : Γ ∷ X ⊢K: Y ↯ Σ , C )
