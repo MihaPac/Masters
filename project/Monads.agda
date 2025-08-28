@@ -35,21 +35,26 @@ record Monad {l} : Set (lsuc l) where
     -- bind
     _>>=_   : {X Y : Set} → T X → (X → T Y) → T Y
     -- laws
-    η-left  : {X Y : Set} (x : X) (f : X → T Y) → η x >>= f ≡ f x
-    η-right : {X : Set} (c : T X) → c >>= η ≡ c
-    >>=-assoc : {X Y Z : Set} (c : T X) (f : X → T Y) (g : Y → T Z)
-              → ((c >>= f) >>= g) ≡ c >>= (λ x → f x >>= g)
+    η-left  : {X Y : Set} (x : X) (f : X → T Y) 
+      → η x >>= f ≡ f x
+    η-right : {X : Set} (t : T X) 
+      → t >>= η ≡ t
+    >>=-assoc : {X Y Z : Set} (t : T X) 
+      (f : X → T Y) (g : Y → T Z)
+      → ((t >>= f) >>= g) ≡ t >>= (λ x → f x >>= g)
 
 
-η-right-Tree : {X : Set} {Σ : Sig} (c : Tree Σ X) → bind-tree leaf c ≡ c
+η-right-Tree : {X : Set} {Σ : Sig} (t : Tree Σ X) → bind-tree leaf t ≡ t
 η-right-Tree (leaf x) = refl
-η-right-Tree (node op p param c) = cong (node op p param) (fun-ext (λ res → η-right-Tree (c res)))
+η-right-Tree (node op x param t) = 
+  cong (node op x param) (fun-ext (λ res → η-right-Tree (t res)))
 
->>=-assoc-Tree : {X Y Z : Set} {Σ : Sig} (c : Tree Σ X) (f : X → Tree Σ Y)
+>>=-assoc-Tree : {X Y Z : Set} {Σ : Sig} (t : Tree Σ X) (f : X → Tree Σ Y)
     (g : Y → Tree Σ Z) →
-    bind-tree g (bind-tree f c) ≡ bind-tree (λ x → bind-tree g (f x)) c
+    bind-tree g (bind-tree f t) ≡ bind-tree (λ x → bind-tree g (f x)) t
 >>=-assoc-Tree (leaf x) f g = refl
->>=-assoc-Tree (node op p param c) f g = cong (node op p param) (fun-ext (λ res → >>=-assoc-Tree (c res) f g))
+>>=-assoc-Tree (node op x param t) f g = 
+  cong (node op x param) (fun-ext (λ res → >>=-assoc-Tree (t res) f g))
 
 
 TreeMonad : Monad {l}
@@ -63,7 +68,8 @@ TreeMonad   = record {
   >>=-assoc = >>=-assoc-Tree }
 
 
-UMonad : Monad {l} --TODO: this is the same as TreeMonad
+UMonad : Monad {l} 
+--TODO: this is the same as TreeMonad
 UMonad = record {
   T         = UComp Σ ;
   η         = leaf ;
@@ -76,15 +82,24 @@ UMonad = record {
 KMonad : (C : Set) → Monad {l}
 KMonad C = record {
   T         = KComp Σ C ;
-  η         = λ x c → leaf (x , c) ;
-  _>>=_     = λ K f c → bind-kernel f K c ;
-  η-left    = λ c f → refl ;
+  η         = λ x C → leaf (x , C) ;
+  _>>=_     = λ K f C → bind-kernel f K C ;
+  η-left    = λ x f → refl ;--λ C f → refl ;
   η-right   = η-right-Kernel ;
   >>=-assoc = >>=-assoc-Kernel }
   where
-    η-right-Kernel : {X : Set} (K : KComp Σ C X) → bind-kernel (λ x c → leaf (x , c)) K ≡ K --TODO: rename things as you go so that it makes sense
-    η-right-Kernel K = fun-ext λ c → η-right-Tree (K c)
+    η-right-Kernel : {X : Set} (K : KComp Σ C X) 
+      → bind-kernel (λ x C → leaf (x , C)) K ≡ K 
+      --TODO: rename things as you go so that it makes sense
+    η-right-Kernel K = fun-ext λ C → η-right-Tree (K C)
 
-    >>=-assoc-Kernel : {X Y Z : Set} (K : KComp Σ C X) (f : X → KComp Σ C Y) (g : Y → KComp Σ C Z)
-      → bind-kernel g (bind-kernel f K) ≡ bind-kernel (λ x → bind-kernel g (f x)) K
-    >>=-assoc-Kernel K f g = fun-ext (λ c → >>=-assoc-Tree (K c) (λ { (x , c') → f x c' }) (λ { (y , c') → g y c' }))
+    >>=-assoc-Kernel : {X Y Z : Set} (K : KComp Σ C X) 
+      (f : X → KComp Σ C Y) (g : Y → KComp Σ C Z)
+      → bind-kernel g (bind-kernel f K) ≡ 
+        bind-kernel (λ x → bind-kernel g (f x)) K
+    >>=-assoc-Kernel K f g = 
+      fun-ext (λ C → 
+        >>=-assoc-Tree 
+          (K C) 
+          (λ { (x , C') → f x C' }) 
+          (λ { (y , C') → g y C' }))

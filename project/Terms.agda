@@ -43,14 +43,14 @@ interleaved mutual
         → Γ ⊢V: X ×v Y
 
     funU : {X : VType} {Xᵤ : UType}
-         → Γ ∷ X ⊢U: Xᵤ
-         ---------------------
-         → Γ ⊢V: X ⟶ᵤ Xᵤ
+          → Γ ∷ X ⊢U: Xᵤ
+          ---------------------
+          → Γ ⊢V: X ⟶ᵤ Xᵤ
 
     funK : {X : VType} {Xₖ : KType}
-         → (Γ ∷ X) ⊢K: Xₖ
-         ------------------------------
-         → Γ ⊢V: X ⟶ₖ Xₖ
+          → (Γ ∷ X) ⊢K: Xₖ
+          ------------------------------
+          → Γ ⊢V: X ⟶ₖ Xₖ
 
     runner : {Σ Σ' : Sig} {C : KState}
          → ((op : Op) → (op ∈ₒ Σ) → co-op Γ Σ' C op)
@@ -60,16 +60,16 @@ interleaved mutual
   data _⊢U:_ where
 
     sub-user : {Xᵤ Xᵤ' : UType}
-         → Γ ⊢U: Xᵤ
-         → Xᵤ ⊑ᵤ Xᵤ'
-         -----------------------
-         → Γ ⊢U: Xᵤ'
+          → Γ ⊢U: Xᵤ
+          → Xᵤ ⊑ᵤ Xᵤ'
+          -----------------------
+          → Γ ⊢U: Xᵤ'
 
     return : {X : VType} {Σ : Sig}
     -- TyUser-Return
-       → Γ ⊢V: X
-       ----------
-       → Γ ⊢U: X ! Σ
+        → Γ ⊢V: X
+        ----------
+        → Γ ⊢U: X ! Σ
 
     _·_ : {X : VType} {Xᵤ : UType} -- Formerly apply
       → Γ ⊢V: X ⟶ᵤ Xᵤ
@@ -78,12 +78,12 @@ interleaved mutual
       → Γ ⊢U: Xᵤ
 
     opᵤ : {X : VType} {Σ : Sig}
-       → (op : Op)
-       → op ∈ₒ Σ
-       → Γ ⊢V: gnd (param op)
-       → Γ ∷ gnd (result op) ⊢U: X ! Σ
-       -------------------------------
-       → Γ ⊢U: X ! Σ
+        → (op : Op)
+        → op ∈ₒ Σ
+        → Γ ⊢V: gnd (param op)
+        → Γ ∷ gnd (result op) ⊢U: X ! Σ
+        -------------------------------
+        → Γ ⊢U: X ! Σ
 
     `let_`in : {X Y : VType} { Σ : Sig }
       → Γ ⊢U: X ! Σ
@@ -115,10 +115,10 @@ interleaved mutual
   data _⊢K:_ where
 
     sub-kernel : {Xₖ Xₖ' : KType}
-         → Γ ⊢K: Xₖ
-         → Xₖ ⊑ₖ Xₖ'
-         ------------------------------------
-         → Γ ⊢K: Xₖ'
+          → Γ ⊢K: Xₖ
+          → Xₖ ⊑ₖ Xₖ'
+          ------------------------------------
+          → Γ ⊢K: Xₖ'
 
     return : {X : VType} {Σ : Sig} {C : KState}
       → Γ ⊢V: X

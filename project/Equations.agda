@@ -22,69 +22,69 @@ interleaved mutual
 
     -- equivalence rules
 
-    refl : {X : VType} {v : Γ ⊢V: X}
-         ---------------------------
-         → Γ ⊢V v ≡ v
+    refl : {X : VType} {V : Γ ⊢V: X}
+          ---------------------------
+          → Γ ⊢V V ≡ V
 
-    sym : {X : VType} {v v' : Γ ⊢V: X}
-      → Γ ⊢V v ≡ v'
+    sym : {X : VType} {V V' : Γ ⊢V: X}
+      → Γ ⊢V V ≡ V'
       --------------------
-      → Γ ⊢V v' ≡ v
+      → Γ ⊢V V' ≡ V
 
-    trans : {X : VType} {v w z : Γ ⊢V: X}
-      → Γ ⊢V v ≡ w
-      → Γ ⊢V w ≡ z
+    trans : {X : VType} {V V' V'' : Γ ⊢V: X}
+      → Γ ⊢V V ≡ V'
+      → Γ ⊢V V' ≡ V''
       --------------------------
-      → Γ ⊢V v ≡ z
+      → Γ ⊢V V ≡ V''
 
     -- congruence rules
 
     prod-cong :
       {X Y : VType}
-      {v₁ v₂ : Γ ⊢V: X}
-      {w₁ w₂ : Γ ⊢V: Y}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ⊢V w₁ ≡ w₂
+      {V V' : Γ ⊢V: X}
+      {W W' : Γ ⊢V: Y}
+      → Γ ⊢V V ≡ V'
+      → Γ ⊢V W ≡ W'
       -----------------------------
-      → Γ ⊢V ⟨ v₁ , w₁ ⟩ ≡ ⟨ v₂ , w₂ ⟩
+      → Γ ⊢V ⟨ V , W ⟩ ≡ ⟨ V' , W' ⟩
 
-    fun-cong :
+    funU-cong :
         {X : VType} {Xᵤ : UType}
-        {m n : Γ ∷ X ⊢U: Xᵤ}
-      → (Γ ∷ X) ⊢U m ≡ n
+        {M N : Γ ∷ X ⊢U: Xᵤ}
+      → (Γ ∷ X) ⊢U M ≡ N
       -------------------------
-      → Γ ⊢V (funU m) ≡ (funU n)
+      → Γ ⊢V (funU M) ≡ (funU N)
 
     funK-cong :
       {X : VType} {Xₖ : KType}
-      {m n : (Γ ∷ X) ⊢K: Xₖ}
-      → (Γ ∷ X) ⊢K m ≡ n
+      {K L : (Γ ∷ X) ⊢K: Xₖ}
+      → (Γ ∷ X) ⊢K K ≡ L
       -----------------
-      → Γ ⊢V (funK m) ≡ (funK n)
+      → Γ ⊢V (funK K) ≡ (funK L)
 
     runner-cong :
       {X : VType} {Σ Σ' : Sig} {C : KState}
-      {r r' : ((op : Op) → (op ∈ₒ Σ) → co-op Γ Σ' C op)}
-      → ((op : Op) → (p : op ∈ₒ Σ) → (Γ ∷ gnd (param op)) ⊢K r op p ≡ r' op p)
+      {R R' : ((op : Op) → (op ∈ₒ Σ) → co-op Γ Σ' C op)}
+      → ((op : Op) → (x : op ∈ₒ Σ) → (Γ ∷ gnd (param op)) ⊢K R op x ≡ R' op x)
       ------------------------------------------------------------------------
-      → Γ ⊢V runner r ≡ runner r'
+      → Γ ⊢V runner R ≡ runner R'
 
     -- rules from the paper
 
 
-    unit-eta : {v : Γ ⊢V: gnd unit}
-           ----------------------
-           → Γ ⊢V v ≡ ⟨⟩
+    unit-eta : {V : Γ ⊢V: gnd unit}
+      ----------------------
+      → Γ ⊢V V ≡ ⟨⟩
 
-    funU-eta : {X : VType} {Xᵤ : UType} --funU-eta
-      {v : Γ ⊢V: X ⟶ᵤ Xᵤ}
+    funU-eta : {X : VType} {Xᵤ : UType}
+      {V : Γ ⊢V: X ⟶ᵤ Xᵤ}
       ------------
-      → Γ ⊢V funU ((v [ wkᵣ ]ᵥᵣ) · var here) ≡ v -- str 32 fig 12 druga enačba v prvi vrstici
+      → Γ ⊢V funU ((V [ wkᵣ ]ᵥᵣ) · var here) ≡ V
 
     funK-eta : {X : VType} {Xₖ : KType}
-      {v : Γ ⊢V: X ⟶ₖ Xₖ}
+      {V : Γ ⊢V: X ⟶ₖ Xₖ}
       ---------------
-      → Γ ⊢V funK ((v [ wkᵣ ]ᵥᵣ) · (var here)) ≡ v
+      → Γ ⊢V funK ((V [ wkᵣ ]ᵥᵣ) · (var here)) ≡ V
 
 
 
@@ -92,400 +92,397 @@ interleaved mutual
   data _⊢U_≡_ where
 
     -- equivalence rules
-    refl : {Xᵤ : UType} {m : Γ ⊢U: Xᵤ}
-         ---------------------------
-         → Γ ⊢U m ≡ m
+    refl : {Xᵤ : UType} {M : Γ ⊢U: Xᵤ}
+          ---------------------------
+          → Γ ⊢U M ≡ M
 
-    sym : {Xᵤ : UType} {m m' : Γ ⊢U: Xᵤ}
-      → Γ ⊢U m ≡ m'
+    sym : {Xᵤ : UType} {M M' : Γ ⊢U: Xᵤ}
+      → Γ ⊢U M ≡ M'
       --------------------
-      → Γ ⊢U m' ≡ m
+      → Γ ⊢U M' ≡ M
 
-    trans : {Xᵤ : UType} { m m' m'' : Γ ⊢U: Xᵤ}
-      → Γ ⊢U m ≡ m'
-      → Γ ⊢U m' ≡ m''
+    trans : {Xᵤ : UType} { M M' M'' : Γ ⊢U: Xᵤ}
+      → Γ ⊢U M ≡ M'
+      → Γ ⊢U M' ≡ M''
       --------------------------
-      → Γ ⊢U m ≡ m''
+      → Γ ⊢U M ≡ M''
 
     -- congruence rules
 
     return-cong :
-      {X : VType} {v w : Γ ⊢V: X}
+      {X : VType} {V W : Γ ⊢V: X}
       {Σ : Sig}
-      → Γ ⊢V v ≡ w
+      → Γ ⊢V V ≡ W
       ------------------
-      → Γ ⊢U return {Σ = Σ} v ≡ return w
+      → Γ ⊢U return {Σ = Σ} V ≡ return W
 
     ·-cong :
       {X : VType} {Xᵤ : UType}
-      {v₁ v₂ : Γ ⊢V: X ⟶ᵤ Xᵤ}
-      {w₁ w₂ : Γ ⊢V: X}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ⊢V w₁ ≡ w₂
+      {V V' : Γ ⊢V: X ⟶ᵤ Xᵤ}
+      {W W' : Γ ⊢V: X}
+      → Γ ⊢V V ≡ V'
+      → Γ ⊢V W ≡ W'
       ----------------------
-      → Γ ⊢U v₁ · w₁ ≡ (v₂ · w₂)
+      → Γ ⊢U V · W ≡ (V' · W')
 
     opᵤ-cong :
       {X : VType} {Σ : Sig}
       {op : Op}
-      {v₁ v₂ : Γ ⊢V: gnd (param op)}
-      {m₁ m₂ : Γ ∷ gnd (result op) ⊢U: X ! Σ}
-      → (p : op ∈ₒ Σ)
-      → Γ ⊢V v₁ ≡ v₂
-      → (Γ ∷ gnd (result op)) ⊢U m₁ ≡ m₂
+      {V V' : Γ ⊢V: gnd (param op)}
+      {M M' : Γ ∷ gnd (result op) ⊢U: X ! Σ}
+      → (x : op ∈ₒ Σ)
+      → Γ ⊢V V ≡ V'
+      → (Γ ∷ gnd (result op)) ⊢U M ≡ M'
       --------------------
-      → Γ ⊢U opᵤ op p  v₁ m₁ ≡ opᵤ op p v₂ m₂
+      → Γ ⊢U opᵤ op x V M ≡ opᵤ op x V' M'
 
     let-in-cong :
       {X Y : VType} {Σ : Sig}
-      {m₁ m₂ : Γ ⊢U: X ! Σ}
-      {n₁ n₂ : Γ ∷ X ⊢U: Y ! Σ}
-      → Γ ⊢U m₁ ≡ m₂
-      → Γ ∷ X ⊢U n₁ ≡ n₂
+      {M M' : Γ ⊢U: X ! Σ}
+      {N N' : Γ ∷ X ⊢U: Y ! Σ}
+      → Γ ⊢U M ≡ M'
+      → Γ ∷ X ⊢U N ≡ N'
       --------------------
-      → Γ ⊢U `let m₁ `in n₁ ≡ `let m₂ `in n₂
+      → Γ ⊢U `let M `in N ≡ `let M' `in N'
 
     match-with-cong :
       {X Y : VType} {Xᵤ : UType}
-      {v₁ v₂ : Γ ⊢V: X ×v Y}
-      {m₁ m₂ : Γ ∷ X ∷ Y ⊢U: Xᵤ}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ∷ X ∷ Y ⊢U m₁ ≡ m₂
+      {V V' : Γ ⊢V: X ×v Y}
+      {M M' : Γ ∷ X ∷ Y ⊢U: Xᵤ}
+      → Γ ⊢V V ≡ V'
+      → Γ ∷ X ∷ Y ⊢U M ≡ M'
       ----------------------
-      → Γ ⊢U (match v₁ `with m₁) ≡ (match v₂ `with m₂)
+      → Γ ⊢U (match V `with M) ≡ (match V' `with M')
 
 
     using-at-run-finally-cong :
       {X Y : VType} {Σ Σ' : Sig} {C : KState}
-      {v₁ v₂ : Γ ⊢V: Σ ⇒ Σ' , C}
-      {w₁ w₂ : Γ ⊢V: gnd C}
-      {m₁ m₂ : Γ ⊢U: X ! Σ}
-      {n₁ n₂ : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ'}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ⊢V w₁ ≡ w₂
-      → Γ ⊢U m₁ ≡ m₂
-      → Γ ∷ X ∷ gnd C ⊢U n₁ ≡ n₂
+      {V V' : Γ ⊢V: Σ ⇒ Σ' , C}
+      {W W' : Γ ⊢V: gnd C}
+      {M M' : Γ ⊢U: X ! Σ}
+      {N N' : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ'}
+      → Γ ⊢V V ≡ V'
+      → Γ ⊢V W ≡ W'
+      → Γ ⊢U M ≡ M'
+      → Γ ∷ X ∷ gnd C ⊢U N ≡ N'
       ------------------------
-      → Γ ⊢U `using v₁ at w₁ `run m₁ finally n₁
-      ≡ `using v₂ at w₂ `run m₂ finally n₂
+      → Γ ⊢U `using V at W `run M finally N
+      ≡ `using V' at W' `run M' finally N'
 
     kernel-at-finally-cong :
       {X Y : VType} {Σ : Sig} {C : KState}
-      {v₁ v₂ : Γ ⊢V: gnd C}
-      {m₁ m₂ : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ}
-      {k₁ k₂ : Γ ⊢K: X ↯ Σ , C}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ∷ X ∷ gnd C ⊢U m₁ ≡ m₂
-      → Γ ⊢K k₁ ≡ k₂
+      {V V' : Γ ⊢V: gnd C}
+      {M M' : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ}
+      {K K' : Γ ⊢K: X ↯ Σ , C}
+      → Γ ⊢V V ≡ V'
+      → Γ ∷ X ∷ gnd C ⊢U M ≡ M'
+      → Γ ⊢K K ≡ K'
       ------------------------
-      → Γ ⊢U kernel k₁ at v₁ finally m₁ ≡ kernel k₂ at v₂ finally m₂
+      → Γ ⊢U kernel K at V finally M ≡ kernel K' at V' finally M'
 
     -- rules from the paper
     funU-beta : {X : VType} {Xᵤ : UType} -- str32 prva vrstica
-      → (m : (Γ ∷ X) ⊢U: Xᵤ)
-      → (v : Γ ⊢V: X)
+      → (M : (Γ ∷ X) ⊢U: Xᵤ)
+      → (V : Γ ⊢V: X)
       -------------------------------
-      → Γ ⊢U (funU m) · v ≡ (m [ idₛ ∷ₛ v ]ᵤ)
+      → Γ ⊢U (funU M) · V ≡ (M [ idₛ ∷ₛ V ]ᵤ)
 
     let-in-beta-return_ : {X Y : VType} {Σ : Sig}
-      → (v : Γ ⊢V: X)
-      → (m : Γ ∷ X ⊢U: Y ! Σ)
+      → (V : Γ ⊢V: X)
+      → (M : Γ ∷ X ⊢U: Y ! Σ)
       ----------------------------
-      → Γ ⊢U `let (return v) `in m ≡ (m [ (idₛ ∷ₛ v) ]ᵤ)
+      → Γ ⊢U `let (return V) `in M ≡ (M [ (idₛ ∷ₛ V) ]ᵤ)
 
     let-in-beta-op : {X Y : VType} {Σ : Sig}
       → (op : Op)
-      → (p : op ∈ₒ Σ)
-      → (v : Γ ⊢V: gnd (param op))
-      → (m : Γ ∷ gnd (result op) ⊢U: X ! Σ)
-      → (n : Γ ∷ X ⊢U: Y ! Σ)
+      → (x : op ∈ₒ Σ)
+      → (V : Γ ⊢V: gnd (param op))
+      → (M : Γ ∷ gnd (result op) ⊢U: X ! Σ)
+      → (N : Γ ∷ X ⊢U: Y ! Σ)
       --------------------------------
-      → Γ ⊢U `let (opᵤ op p v m) `in n ≡ opᵤ op p v (`let m `in (n [ extdᵣ wkᵣ ]ᵤᵣ))
+      → Γ ⊢U `let (opᵤ op x V M) `in N ≡ 
+        opᵤ op x V (`let M `in (N [ extdᵣ wkᵣ ]ᵤᵣ))
 
     match-with-beta-prod : {X Y : VType} {Xᵤ : UType}
-      (v₁ : Γ ⊢V: X)
-      (v₂ : Γ ⊢V: Y)
-      → (m : Γ ∷ X ∷ Y ⊢U: Xᵤ)
+      (V : Γ ⊢V: X)
+      (W : Γ ⊢V: Y)
+      → (M : Γ ∷ X ∷ Y ⊢U: Xᵤ)
       -----------------
-      → Γ ⊢U match ⟨ v₁ , v₂ ⟩ `with m ≡ (m [ ((idₛ ∷ₛ v₁) ∷ₛ v₂) ]ᵤ)
+      → Γ ⊢U match ⟨ V , W ⟩ `with M ≡ (M [ ((idₛ ∷ₛ V) ∷ₛ W) ]ᵤ)
 
     using-run-finally-beta-return :
       {Σ Σ' : Sig} {C : KState} {X Y : VType}
-      → (r : Γ ⊢V: Σ ⇒ Σ' , C)
-      → (w : Γ ⊢V: gnd C)
-      → (v : Γ ⊢V: X)
-      → (n : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ')
+      → (R : Γ ⊢V: Σ ⇒ Σ' , C)
+      → (W : Γ ⊢V: gnd C)
+      → (V : Γ ⊢V: X)
+      → (N : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ')
       ------------
-      → Γ ⊢U `using r at w `run return v finally n ≡ (n [ (idₛ ∷ₛ v) ∷ₛ w ]ᵤ)
+      → Γ ⊢U `using R at W `run return V finally N ≡ (N [ (idₛ ∷ₛ V) ∷ₛ W ]ᵤ)
 
     using-run-finally-beta-op :
       {Σ Σ' : Sig} {C : KState} {X Y : VType}
-      → (r : ((op : Op) → (op ∈ₒ Σ) → co-op Γ Σ' C op))
-      → (w : Γ ⊢V: gnd C)
+      → (R : ((op : Op) → (op ∈ₒ Σ) → co-op Γ Σ' C op))
+      → (W : Γ ⊢V: gnd C)
       → (op : Op)
-      → (v : Γ ⊢V: gnd (param op))
-      → (p : op ∈ₒ Σ)
-      → (m : Γ ∷ gnd (result op) ⊢U: X ! Σ)
-      → (n : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ')
+      → (V : Γ ⊢V: gnd (param op))
+      → (x : op ∈ₒ Σ)
+      → (M : Γ ∷ gnd (result op) ⊢U: X ! Σ)
+      → (N : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ')
       ------------
-      → Γ ⊢U `using runner r at w `run (opᵤ op p v m) finally n
-          ≡ kernel r op p [ idₛ ∷ₛ v ]ₖ at w finally (`using (runner (rename-runner r (wkᵣ ∘ᵣ wkᵣ))) 
-              at var here `run m [ wkᵣ ]ᵤᵣ finally (n [ extdᵣ (extdᵣ (wkᵣ ∘ᵣ wkᵣ)) ]ᵤᵣ))
+      → Γ ⊢U `using runner R at W `run (opᵤ op x V M) finally N
+          ≡ kernel R op x [ idₛ ∷ₛ V ]ₖ at W finally 
+            (`using (runner (rename-runner R (wkᵣ ∘ᵣ wkᵣ))) 
+              at var here `run M [ wkᵣ ]ᵤᵣ finally 
+                (N [ extdᵣ (extdᵣ (wkᵣ ∘ᵣ wkᵣ)) ]ᵤᵣ))
 
     kernel-at-finally-beta-return : {X Y : VType}
       {Σ : Sig} {C : KState}
-      → (v : Γ ⊢V: X)
-      → (w : Γ ⊢V: gnd C)
-      → (n : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
+      → (V : Γ ⊢V: X)
+      → (W : Γ ⊢V: gnd C)
+      → (N : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
       -------------------
-      → Γ ⊢U kernel return v at w finally n ≡ (n [ ((idₛ ∷ₛ v) ∷ₛ w) ]ᵤ)
+      → Γ ⊢U kernel return V at W finally N ≡ (N [ ((idₛ ∷ₛ V) ∷ₛ W) ]ᵤ)
 
     kernel-at-finally-beta-getenv : {X Y : VType}
       {Σ : Sig} {C : KState}
-      → (v : Γ ⊢V: gnd C)
-      → (k : Γ ∷ gnd C ⊢K: X ↯ Σ , C)
-      → (m : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
+      → (V : Γ ⊢V: gnd C)
+      → (K : Γ ∷ gnd C ⊢K: X ↯ Σ , C)
+      → (M : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
       -------------------
-      → Γ ⊢U kernel getenv k at v finally m
-          ≡ kernel k [ (idₛ ∷ₛ v) ]ₖ at v finally m
+      → Γ ⊢U kernel getenv K at V finally M
+          ≡ kernel K [ (idₛ ∷ₛ V) ]ₖ at V finally M
 
     kernel-at-finally-setenv : {X Y : VType}
       {Σ : Sig} {C : KState}
-      → (v w : Γ ⊢V: gnd C)
-      → (k : Γ ⊢K: X ↯ Σ , C)
-      → (m : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
+      → (V W : Γ ⊢V: gnd C)
+      → (K : Γ ⊢K: X ↯ Σ , C)
+      → (M : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
       -------------------
-      → Γ ⊢U kernel setenv v k at w finally m
-          ≡ kernel k at v finally m
+      → Γ ⊢U kernel setenv V K at W finally M
+          ≡ kernel K at V finally M
 
     kernel-at-finally-beta-op : {X Y : VType}
       {Σ : Sig} {C : KState}
       → (op : Op)
-      → (p : op ∈ₒ Σ)
-      → (v : Γ ⊢V: gnd (param op))
-      → (w : Γ ⊢V: gnd C)
-      → (k : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C)
-      → (m : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
+      → (x : op ∈ₒ Σ)
+      → (V : Γ ⊢V: gnd (param op))
+      → (W : Γ ⊢V: gnd C)
+      → (K : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C)
+      → (M : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ)
       -------------------
-      → Γ ⊢U kernel (opₖ op p v k) at w finally m ≡ 
-          opᵤ op p v (kernel k at (w [ wkᵣ ]ᵥᵣ) finally (m [ extdᵣ (extdᵣ wkᵣ) ]ᵤᵣ))
-      --kernel (opₖ op p v k) at w finally m ≡ opᵤ op p v (kernel k at (w [ (wkₛ idₛ) ]ᵥ) finally (m [ extendₛ (extendₛ (wkₛ idₛ)) ]ᵤ))
-
+      → Γ ⊢U kernel (opₖ op x V K) at W finally M ≡ 
+          opᵤ op x V (kernel K at (W [ wkᵣ ]ᵥᵣ) finally 
+            (M [ extdᵣ (extdᵣ wkᵣ) ]ᵤᵣ))
 
     let-in-eta-M : {X : VType}    -- let-eta
       {Σ : Sig}
-      → (m : Γ ⊢U: X ! Σ)
+      → (M : Γ ⊢U: X ! Σ)
       -------------------
-      → Γ ⊢U `let m `in (return (var here)) ≡ m
+      → Γ ⊢U `let M `in (return (var here)) ≡ M
 
   data _⊢K_≡_ where
 
     -- equivalence rules
-    refl : {Xₖ : KType} {k : Γ ⊢K: Xₖ}
+    refl : {Xₖ : KType} {K : Γ ⊢K: Xₖ}
          ---------------------------
-         → Γ ⊢K k ≡ k
+         → Γ ⊢K K ≡ K
 
-    sym : {Xₖ : KType} {k  k' : Γ ⊢K: Xₖ}
-      → Γ ⊢K k ≡ k'
+    sym : {Xₖ : KType} {K  K' : Γ ⊢K: Xₖ}
+      → Γ ⊢K K ≡ K'
       --------------------
-      → Γ ⊢K k' ≡ k
+      → Γ ⊢K K' ≡ K
 
-    trans : {Xₖ : KType} { k k' k'' : Γ ⊢K: Xₖ}
-      → Γ ⊢K k ≡ k'
-      → Γ ⊢K k' ≡ k''
+    trans : {Xₖ : KType} { K K' K'' : Γ ⊢K: Xₖ}
+      → Γ ⊢K K ≡ K'
+      → Γ ⊢K K' ≡ K''
       --------------------------
-      → Γ ⊢K k ≡ k''
+      → Γ ⊢K K ≡ K''
 
     -- congruence rules
 
     return-cong :
       {X : VType} {Σ : Sig} {C : KState}
-      {v₁ v₂ : Γ ⊢V: X}
-      → Γ ⊢V v₁ ≡ v₂
+      {V₁ V₂ : Γ ⊢V: X}
+      → Γ ⊢V V₁ ≡ V₂
       ----------------
-      → Γ ⊢K return {Σ = Σ} {C = C} v₁ ≡ return v₂
+      → Γ ⊢K return {Σ = Σ} {C = C} V₁ ≡ return V₂
 
     ·-cong :
       {X : VType} {Xₖ : KType}
-      {v₁ v₂ : Γ ⊢V: X ⟶ₖ Xₖ}
-      {w₁ w₂ : Γ ⊢V: X}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ⊢V w₁ ≡ w₂
+      {V V' : Γ ⊢V: X ⟶ₖ Xₖ}
+      {W W' : Γ ⊢V: X}
+      → Γ ⊢V V ≡ V'
+      → Γ ⊢V W ≡ W'
       -----------------------
-      → Γ ⊢K (v₁ · w₁) ≡ (v₂ · w₂)
+      → Γ ⊢K (V · W) ≡ (V' · W')
 
     let-in-cong :
       {X Y : VType} {Σ : Sig} {C : KState}
-      {k₁ k₂ : Γ ⊢K:  X ↯ Σ , C}
-      {l₁ l₂ : Γ ∷ X ⊢K: Y ↯ Σ , C}
-      → Γ ⊢K k₁ ≡ k₂
-      → Γ ∷ X ⊢K l₁ ≡ l₂
+      {K K' : Γ ⊢K:  X ↯ Σ , C}
+      {L L' : Γ ∷ X ⊢K: Y ↯ Σ , C}
+      → Γ ⊢K K ≡ K'
+      → Γ ∷ X ⊢K L ≡ L'
       ----------------
-      → Γ ⊢K `let k₁ `in l₁ ≡ `let k₂ `in l₂
+      → Γ ⊢K `let K `in L ≡ `let K' `in L'
 
     match-with-cong :
       {X Y : VType} {Xₖ : KType}
-      {v₁ v₂ : Γ ⊢V: X ×v Y}
-      {k₁ k₂ : Γ ∷ X ∷ Y ⊢K: Xₖ}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ∷ X ∷ Y ⊢K k₁ ≡ k₂
+      {V V' : Γ ⊢V: X ×v Y}
+      {K K' : Γ ∷ X ∷ Y ⊢K: Xₖ}
+      → Γ ⊢V V ≡ V'
+      → Γ ∷ X ∷ Y ⊢K K ≡ K'
       ----------------
-      → Γ ⊢K match v₁ `with k₁ ≡ (match v₂ `with k₂)
+      → Γ ⊢K match V `with K ≡ (match V' `with K')
 
-    opₖ-cong :  -- cong pravilo, poglej še enkrat če pravilno
+    opₖ-cong :
       {X Y : VType} {Σ : Sig} {C : KState}
       {op : Op}
-      {p : op ∈ₒ Σ}
-      {v₁ v₂ : Γ ⊢V: gnd (param op)}
-      {k₁ k₂ : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ∷ gnd (result op) ⊢K k₁ ≡ k₂
+      {x : op ∈ₒ Σ}
+      {V V' : Γ ⊢V: gnd (param op)}
+      {K K' : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C}
+      → Γ ⊢V V ≡ V'
+      → Γ ∷ gnd (result op) ⊢K K ≡ K'
       ----------------
-      → Γ ⊢K opₖ op p v₁ k₁ ≡ opₖ op p v₂ k₂
+      → Γ ⊢K opₖ op x V K ≡ opₖ op x V' K'
 
     getenv-cong :
       {X : VType} {C : KState} {Σ : Sig}
-      {k₁ k₂ : Γ ∷ gnd C ⊢K: X ↯ Σ , C}
-      → Γ ∷ gnd C ⊢K k₁ ≡ k₂
+      {K K' : Γ ∷ gnd C ⊢K: X ↯ Σ , C}
+      → Γ ∷ gnd C ⊢K K ≡ K'
       -----------------
-      → Γ ⊢K getenv k₁ ≡ getenv k₂
+      → Γ ⊢K getenv K ≡ getenv K'
 
     setenv-cong :
       {X : VType} {C : KState} {Σ : Sig}
-      {v₁ v₂ : Γ ⊢V: gnd C}
-      {k₁ k₂ : Γ ⊢K: X ↯ Σ , C}
-      → Γ ⊢V v₁ ≡ v₂
-      → Γ ⊢K k₁ ≡ k₂
+      {V V' : Γ ⊢V: gnd C}
+      {K K' : Γ ⊢K: X ↯ Σ , C}
+      → Γ ⊢V V ≡ V'
+      → Γ ⊢K K ≡ K'
       --------------------
-      → Γ ⊢K setenv v₁ k₁ ≡ setenv v₂ k₂
+      → Γ ⊢K setenv V K ≡ setenv V' K'
 
     user-with-cong :
       {X Y : VType} {Σ : Sig} {C : KState}
-      {m₁ m₂ : Γ ⊢U: X ! Σ}
-      {k₁ k₂ : Γ ∷ X ⊢K: Y ↯ Σ , C}
-      → Γ ⊢U m₁ ≡ m₂
-      → Γ ∷ X ⊢K k₁ ≡ k₂
+      {M M' : Γ ⊢U: X ! Σ}
+      {K K' : Γ ∷ X ⊢K: Y ↯ Σ , C}
+      → Γ ⊢U M ≡ M'
+      → Γ ∷ X ⊢K K ≡ K'
       -------------------
-      → Γ ⊢K user m₁ `with k₁ ≡ user m₂ `with k₂
+      → Γ ⊢K user M `with K ≡ user M' `with K'
 
 
     -- rules from the paper
 
     funK-beta : {X : VType} {Xₖ : KType}
-      → (k : Γ ∷ X ⊢K: Xₖ)
-      → (v : Γ ⊢V: X)
+      → (K : Γ ∷ X ⊢K: Xₖ)
+      → (V : Γ ⊢V: X)
       -------------------
-      → Γ ⊢K (funK k) · v ≡ (k [ idₛ ∷ₛ v ]ₖ)
+      → Γ ⊢K (funK K) · V ≡ (K [ idₛ ∷ₛ V ]ₖ)
 
     let-in-beta-return : {X Y : VType}
       {Σ : Sig} {C : KState}
-      → (v : Γ ⊢V: X)
-      → (k : Γ ∷ X ⊢K: Y ↯ Σ , C )
+      → (V : Γ ⊢V: X)
+      → (K : Γ ∷ X ⊢K: Y ↯ Σ , C )
       -----------------
-      → Γ ⊢K `let (return v) `in k ≡ (k [ idₛ ∷ₛ v ]ₖ )
+      → Γ ⊢K `let (return V) `in K ≡ (K [ idₛ ∷ₛ V ]ₖ )
 
     let-in-beta-op :
       {X Y Z : VType}
       {Σ : Sig} {C : KState}
       → (op : Op)
-      → (p : op ∈ₒ Σ)
-      → (v : Γ ⊢V: gnd (param op))
-      → (k : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C)
-      → (l : Γ ∷ X ⊢K: Y ↯ Σ , C)
+      → (x : op ∈ₒ Σ)
+      → (V : Γ ⊢V: gnd (param op))
+      → (K : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C)
+      → (L : Γ ∷ X ⊢K: Y ↯ Σ , C)
       -----------------
-      → Γ ⊢K `let (opₖ op p v k) `in l ≡ opₖ op p v (`let k `in (l [ extdᵣ wkᵣ ]ₖᵣ))
+      → Γ ⊢K `let (opₖ op x V K) `in L ≡ 
+          opₖ op x V (`let K `in (L [ extdᵣ wkᵣ ]ₖᵣ))
 
-    let-in-beta-getenv : {X Y : VType} -- nisem povsem preprican tu
+    let-in-beta-getenv : {X Y : VType}
       {C : KState} {Σ : Sig}
-      → (k : Γ ∷ gnd C ⊢K: X ↯ Σ , C)
-      → (l : Γ ∷ X ⊢K: Y ↯ Σ , C)
+      → (K : Γ ∷ gnd C ⊢K: X ↯ Σ , C)
+      → (L : Γ ∷ X ⊢K: Y ↯ Σ , C)
       -----------------
-      → Γ ⊢K `let (getenv k) `in l
-          ≡ getenv (`let k `in (l [ extdᵣ wkᵣ ]ₖᵣ))
+      → Γ ⊢K `let (getenv K) `in L
+          ≡ getenv (`let K `in (L [ extdᵣ wkᵣ ]ₖᵣ))
 
     let-in-beta-setenv : {X Y : VType}
       {C : KState} {Σ : Sig}
-      → (v : Γ ⊢V: gnd C)
-      → (k : Γ ⊢K: X ↯ Σ , C)
-      → (l : Γ ∷ X ⊢K: Y ↯ Σ , C)
+      → (V : Γ ⊢V: gnd C)
+      → (K : Γ ⊢K: X ↯ Σ , C)
+      → (L : Γ ∷ X ⊢K: Y ↯ Σ , C)
       -----------------
-      → Γ ⊢K `let (setenv v k) `in l
-          ≡ setenv v (`let k `in l)
+      → Γ ⊢K `let (setenv V K) `in L
+          ≡ setenv V (`let K `in L)
 
     match-with-beta-prod : {X Y Z : VType}
       {Σ : Sig} {C : KState}
-      → (v : Γ ⊢V: X)
-      → (w : Γ ⊢V: Y)
-      → (k : Γ ∷ X ∷ Y ⊢K: Z ↯ Σ , C)
+      → (V : Γ ⊢V: X)
+      → (W : Γ ⊢V: Y)
+      → (K : Γ ∷ X ∷ Y ⊢K: Z ↯ Σ , C)
       -------------------
-      → Γ ⊢K match ⟨ v , w ⟩ `with k ≡ (k [ (idₛ ∷ₛ v) ∷ₛ w ]ₖ)
-
-    {- match-with-beta-null : {X : VType}
-      → {!!}
-      -------------------
-      → Γ ⊢K {!!} ≡ {!!} -}
+      → Γ ⊢K match ⟨ V , W ⟩ `with K ≡ (K [ (idₛ ∷ₛ V) ∷ₛ W ]ₖ)
 
     user-with-beta-return : {X Y : VType}
       {Σ : Sig} {C : KState}
-      → (v : Γ ⊢V: X)
-      → (k : Γ ∷ X ⊢K: Y ↯ Σ , C)
+      → (V : Γ ⊢V: X)
+      → (K : Γ ∷ X ⊢K: Y ↯ Σ , C)
       ----------------------
-      → Γ ⊢K user return v `with k ≡ (k [ (idₛ ∷ₛ v) ]ₖ)
+      → Γ ⊢K user return V `with K ≡ (K [ (idₛ ∷ₛ V) ]ₖ)
 
     user-with-beta-op : {X Y : VType}
       {Σ : Sig} {C : KState}
       → (op : Op)
-      → (p : op ∈ₒ Σ)
-      → (v : Γ ⊢V: gnd (param op))
-      → (m : Γ ∷ gnd (result op) ⊢U: X ! Σ)
-      → (k : Γ ∷ X ⊢K: Y ↯ Σ , C)
+      → (x : op ∈ₒ Σ)
+      → (V : Γ ⊢V: gnd (param op))
+      → (M : Γ ∷ gnd (result op) ⊢U: X ! Σ)
+      → (K : Γ ∷ X ⊢K: Y ↯ Σ , C)
       ----------------------
-      → Γ ⊢K user (opᵤ op p v m) `with k
-          ≡ opₖ op p v (user m `with (k [ extdᵣ wkᵣ ]ₖᵣ))
+      → Γ ⊢K user (opᵤ op x V M) `with K
+          ≡ opₖ op x V (user M `with (K [ extdᵣ wkᵣ ]ₖᵣ))
 
     let-in-eta-K : {X : VType}
       {Σ : Sig} {C : KState}
-      → (k : Γ ⊢K: X ↯ Σ , C)
+      → (K : Γ ⊢K: X ↯ Σ , C)
       -------------------
-      → Γ ⊢K `let k `in (return (var here)) ≡ k
+      → Γ ⊢K `let K `in (return (var here)) ≡ K
 
-    GetSetenv : {C : KState} {X Y : VType} {Σ : Sig} --tudi za pogledati
-      → (k : Γ ⊢K: X ↯ Σ , C)
+    GetSetenv : {C : KState} {X Y : VType} {Σ : Sig}
+      → (K : Γ ⊢K: X ↯ Σ , C)
       -------------
-      → Γ ⊢K getenv (setenv (var here) (k [ wkᵣ ]ₖᵣ)) ≡ k
+      → Γ ⊢K getenv (setenv (var here) (K [ wkᵣ ]ₖᵣ)) ≡ K
 
     SetGetenv : {C : KState} {X : VType} {Σ : Sig}
-      → (v : Γ ⊢V: gnd C)
-      → (k : Γ ∷ gnd C ⊢K: X ↯ Σ , C)
+      → (V : Γ ⊢V: gnd C)
+      → (K : Γ ∷ gnd C ⊢K: X ↯ Σ , C)
       --------------
-      → Γ ⊢K setenv v (getenv k) ≡ setenv v (k [ idₛ ∷ₛ v ]ₖ)
+      → Γ ⊢K setenv V (getenv K) ≡ setenv V (K [ idₛ ∷ₛ V ]ₖ)
 
     SetSetenv : {C C' : KState} {X : VType} {Σ : Sig}
-      → (v w : Γ ⊢V: gnd C)
-      → (k : Γ ⊢K: X ↯ Σ , C)
+      → (V W : Γ ⊢V: gnd C)
+      → (K : Γ ⊢K: X ↯ Σ , C)
       --------------
-      → Γ ⊢K setenv v (setenv w k) ≡ setenv w k
+      → Γ ⊢K setenv V (setenv W K) ≡ setenv W K
 
     GetOpEnv : {X Y : VType} {C  : KState} {Σ : Sig}
       → (op : Op)
-      → (p : op ∈ₒ Σ)
-      → (v : Γ ⊢V: gnd (param op))
-      → (k : Γ ⊢K: X ↯ Σ , C)
+      → (x : op ∈ₒ Σ)
+      → (V : Γ ⊢V: gnd (param op))
+      → (K : Γ ⊢K: X ↯ Σ , C)
       -----------------
-      → Γ ⊢K getenv (opₖ op p (v [ wkᵣ ]ᵥᵣ) (k [ wkᵣ ∘ᵣ wkᵣ ]ₖᵣ)) ≡ 
-          opₖ op p v (getenv (k [ wkᵣ ∘ᵣ wkᵣ ]ₖᵣ))
+      → Γ ⊢K getenv (opₖ op x (V [ wkᵣ ]ᵥᵣ) (K [ wkᵣ ∘ᵣ wkᵣ ]ₖᵣ)) ≡ 
+          opₖ op x V (getenv (K [ wkᵣ ∘ᵣ wkᵣ ]ₖᵣ))
 
     SetOpEnv : {X : VType} {C : KState} {Σ : Sig}
       → (op : Op)
       → (x : op ∈ₒ Σ)
-      → (w : Γ ⊢V: gnd C)
-      → (v : Γ ⊢V: gnd (param op))
-      → (k : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C)
+      → (W : Γ ⊢V: gnd C)
+      → (V : Γ ⊢V: gnd (param op))
+      → (K : Γ ∷ gnd (result op) ⊢K: X ↯ Σ , C)
       ----------------
-      → Γ ⊢K setenv w (opₖ op x v k) ≡ opₖ op x v (setenv (w [ wkᵣ ]ᵥᵣ) k)
-      --setenv v (opₖ op x v k) ≡ opₖ op x v (setenv w k)
-      --setenv v (opₖ op x v (k [ wkₛ idₛ ]ₖ)) ≡ opₖ op x v (setenv w (k [ wkₛ idₛ ]ₖ))
+      → Γ ⊢K setenv W (opₖ op x V K) ≡ 
+        opₖ op x V (setenv (W [ wkᵣ ]ᵥᵣ) K)
 
 
 infix 1 _⊢V_≡_ _⊢U_≡_ _⊢K_≡_
-  
+ 

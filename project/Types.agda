@@ -32,7 +32,6 @@ interleaved mutual
   data KType where
     _↯_,_ : VType → Sig → KState → KType   --"\dz = ↯"
 
-
 -- Subtyping relations
 _⊆ₛ_ : Sig → Sig → Set
 Σ ⊆ₛ Σ' = (op : Op) → Σ op ≡ true → Σ' op ≡ true
@@ -52,10 +51,10 @@ interleaved mutual
               → gnd A ⊑ᵥ gnd A
 
     ⊑ᵥ-product : {X Y X' Y' : VType}
-               → X ⊑ᵥ X'
-               → Y ⊑ᵥ Y'
-               --------------------
-                 → (X ×v Y) ⊑ᵥ (X' ×v Y')
+                → X ⊑ᵥ X'
+                → Y ⊑ᵥ Y'
+                --------------------
+                → (X ×v Y) ⊑ᵥ (X' ×v Y')
 
 
     ⊑ᵥ-Ufun : {X X' : VType} {Σ Σ' : UType}
@@ -71,23 +70,21 @@ interleaved mutual
                 → X ⟶ₖ Xₖ ⊑ᵥ X' ⟶ₖ Xₖ'
 
     ⊑ᵥ-runner : {Σ₁ Σ₁' Σ₂ Σ₂' : Sig} {C C' : KState}
-               → Σ₁' ⊆ₛ Σ₁
-               → Σ₂ ⊆ₛ Σ₂'
-               → C ≡ C'
-               --------------
-               → Σ₁ ⇒ Σ₂ , C ⊑ᵥ Σ₁' ⇒ Σ₂' , C'
+                → Σ₁' ⊆ₛ Σ₁
+                → Σ₂ ⊆ₛ Σ₂'
+                → C ≡ C'
+                --------------
+                → Σ₁ ⇒ Σ₂ , C ⊑ᵥ Σ₁' ⇒ Σ₂' , C'
 
   data _⊑ᵤ_ where
-
 
     ⊑ᵤ-user : {X X' : VType} {Σ Σ' : Sig}
                 → X ⊑ᵥ X'
                 → Σ ⊆ₛ Σ'
+                -----------------------
                 → X ! Σ ⊑ᵤ X' ! Σ'
 
   data _⊑ₖ_ where
-
-
 
     ⊑ₖ-kernel : {X X' : VType} {Σ Σ' : Sig} {C C' : KState}
                 → X ⊑ᵥ X'
@@ -95,9 +92,6 @@ interleaved mutual
                 → C ≡ C'
                 ---------------------------
                 → X ↯ Σ , C ⊑ₖ X' ↯ Σ' , C'
-
-
-
 
 infix 12 _⟶ᵤ_ _⟶ₖ_ _⇒_,_
 infix 10 _⊑ᵥ_ _⊑ᵤ_ _⊑ₖ_

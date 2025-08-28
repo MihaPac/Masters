@@ -24,7 +24,7 @@ idₛ = var
 --       maps to a given term, not necessarily itself
 -- TASK: implement this one as two simpler functions:
 --       (1) σ : Sub Γ Γ' is transformed to σ' : Sub (Γ ∷ X) Γ'
---       (2) given τ : Sub Δ Δ' and Δ ⊢ v : X, we get ⟨τ, v⟩ : Sub Δ (Δ' ∷ X)
+--       (2) given τ : Sub Δ Δ' and Δ ⊢ V : X, we get ⟨τ, V⟩ : Sub Δ (Δ' ∷ X)
 
 --Composition of Renaming and Substitution
 _ᵣ∘ₛ_ : ∀ {Γ Γ' Γ''} → Ren Γ Γ' → Sub Γ' Γ'' → Sub Γ Γ''
@@ -32,14 +32,14 @@ _ᵣ∘ₛ_ : ∀ {Γ Γ' Γ''} → Ren Γ Γ' → Sub Γ' Γ'' → Sub Γ Γ''
 
 extendₛ : ∀ {Γ Γ' X} → Sub Γ Γ' → Sub (Γ ∷ X) (Γ' ∷ X)
 extendₛ σ here = var here
-extendₛ σ (there p) =  σ p [ wkᵣ ]ᵥᵣ
+extendₛ σ (there x) =  σ x [ wkᵣ ]ᵥᵣ
 
 wkₛ : ∀ {Γ Γ' X} → Sub Γ Γ' → Sub (Γ ∷ X) Γ'
 wkₛ σ = (wkᵣ ᵣ∘ₛ σ)
 
 _∷ₛ_ : ∀ {Γ Γ' X} → Sub Γ Γ' → Γ ⊢V: X → Sub Γ (Γ' ∷ X)
-(σ ∷ₛ v) here = v
-(σ ∷ₛ v) (there p) = σ p
+(σ ∷ₛ V) here = V
+(σ ∷ₛ V) (there x) = σ x
 
 --Composition of Substitution and Renaming
 _ₛ∘ᵣ_ : ∀ {Γ Γ' Γ''} → Sub Γ Γ' → Ren Γ' Γ'' → Sub Γ Γ''
@@ -55,44 +55,48 @@ interleaved mutual
   _[_]ₖ : ∀{Γ Γ' X} → Γ' ⊢K: X → Sub Γ Γ' → Γ ⊢K: X
 
   sub-coop : ∀ {Γ Γ' Σ C op} → co-op Γ Σ C op → Sub Γ' Γ → co-op Γ' Σ C op
-  sub-coop (sub-kernel k p) σ = sub-kernel (k [ (extendₛ σ) ]ₖ) p
-  sub-coop (return v) σ = return (v [ (extendₛ σ) ]ᵥ)
-  sub-coop (v · u) σ = (v [ extendₛ σ ]ᵥ) · (u [ (extendₛ σ) ]ᵥ)
-  sub-coop (`let k `in l) σ = `let k [ (extendₛ σ) ]ₖ `in (l [ (extendₛ (extendₛ σ)) ]ₖ)
-  sub-coop (match v `with k) σ = match (v [ extendₛ σ ]ᵥ) `with (k [ (extendₛ (extendₛ (extendₛ σ))) ]ₖ)
-  sub-coop (opₖ op p v k) σ = opₖ op p (v [ (extendₛ σ) ]ᵥ) (k [ (extendₛ (extendₛ σ)) ]ₖ)
-  sub-coop (getenv k) σ = getenv (k [ (extendₛ (extendₛ σ)) ]ₖ)
-  sub-coop (setenv v k) σ = setenv (v [ (extendₛ σ) ]ᵥ) (k [ (extendₛ σ) ]ₖ)
-  sub-coop (user m `with k) σ = user (m [ (extendₛ σ) ]ᵤ) `with (k [ (extendₛ (extendₛ σ)) ]ₖ)
+  sub-coop (sub-kernel K p) σ = sub-kernel (K [ (extendₛ σ) ]ₖ) p
+  sub-coop (return V) σ = return (V [ (extendₛ σ) ]ᵥ)
+  sub-coop (V · W) σ = (V [ extendₛ σ ]ᵥ) · (W [ (extendₛ σ) ]ᵥ)
+  sub-coop (`let K `in L) σ = 
+    `let K [ (extendₛ σ) ]ₖ `in (L [ (extendₛ (extendₛ σ)) ]ₖ)
+  sub-coop (match V `with K) σ = 
+    match (V [ extendₛ σ ]ᵥ) `with (K [ (extendₛ (extendₛ (extendₛ σ))) ]ₖ)
+  sub-coop (opₖ op x V K) σ = 
+    opₖ op x (V [ (extendₛ σ) ]ᵥ) (K [ (extendₛ (extendₛ σ)) ]ₖ)
+  sub-coop (getenv K) σ = getenv (K [ (extendₛ (extendₛ σ)) ]ₖ)
+  sub-coop (setenv V K) σ = setenv (V [ (extendₛ σ) ]ᵥ) (K [ (extendₛ σ) ]ₖ)
+  sub-coop (user M `with K) σ = 
+    user (M [ (extendₛ σ) ]ᵤ) `with (K [ (extendₛ (extendₛ σ)) ]ₖ)
 
   -- Value
-  var p [ σ ]ᵥ = σ p
-  sub-value v p [ σ ]ᵥ = sub-value (v [ σ ]ᵥ) p
+  var x [ σ ]ᵥ = σ x
+  sub-value V p [ σ ]ᵥ = sub-value (V [ σ ]ᵥ) p
   ⟨⟩ [ σ ]ᵥ = ⟨⟩
-  ⟨ v , w ⟩ [ σ ]ᵥ = ⟨ v [ σ ]ᵥ , w [ σ ]ᵥ ⟩
-  (funU m) [ σ ]ᵥ = funU (m [ extendₛ σ ]ᵤ)
-  (funK k) [ σ ]ᵥ = funK (k [ extendₛ σ ]ₖ)
-  runner r [ σ ]ᵥ = runner λ op p → sub-coop (r op p) σ
+  ⟨ V , W ⟩ [ σ ]ᵥ = ⟨ V [ σ ]ᵥ , W [ σ ]ᵥ ⟩
+  (funU M) [ σ ]ᵥ = funU (M [ extendₛ σ ]ᵤ)
+  (funK K) [ σ ]ᵥ = funK (K [ extendₛ σ ]ₖ)
+  runner R [ σ ]ᵥ = runner λ op x → sub-coop (R op x) σ
 
   -- User
-  sub-user m p [ σ ]ᵤ = sub-user (m [ σ ]ᵤ) p
-  return v [ σ ]ᵤ = return (v [ σ ]ᵥ)
-  (v₁ · v₂) [ σ ]ᵤ = (v₁ [ σ ]ᵥ) · (v₂ [ σ ]ᵥ)
-  opᵤ op p v m [ σ ]ᵤ = opᵤ op p (v [ σ ]ᵥ) (m [ extendₛ σ ]ᵤ)
-  `let m `in n [ σ ]ᵤ = `let m [ σ ]ᵤ `in (n [ (extendₛ σ) ]ᵤ)
-  (match v `with m) [ σ ]ᵤ = match (v [ σ ]ᵥ) `with (m [ (extendₛ (extendₛ σ)) ]ᵤ)
-  `using v at w `run m finally n [ σ ]ᵤ = 
-    `using v [ σ ]ᵥ at w [ σ ]ᵥ `run m [ σ ]ᵤ finally (n [ extendₛ (extendₛ σ) ]ᵤ)
-  kernel k at v finally m [ σ ]ᵤ = 
-    kernel (k [ σ ]ₖ) at (v [ σ ]ᵥ) finally (m [ (extendₛ (extendₛ σ)) ]ᵤ)
+  sub-user M p [ σ ]ᵤ = sub-user (M [ σ ]ᵤ) p
+  return V [ σ ]ᵤ = return (V [ σ ]ᵥ)
+  (V · W) [ σ ]ᵤ = (V [ σ ]ᵥ) · (W [ σ ]ᵥ)
+  opᵤ op x V M [ σ ]ᵤ = opᵤ op x (V [ σ ]ᵥ) (M [ extendₛ σ ]ᵤ)
+  `let M `in N [ σ ]ᵤ = `let M [ σ ]ᵤ `in (N [ (extendₛ σ) ]ᵤ)
+  (match V `with M) [ σ ]ᵤ = match (V [ σ ]ᵥ) `with (M [ (extendₛ (extendₛ σ)) ]ᵤ)
+  `using V at W `run M finally N [ σ ]ᵤ = 
+    `using V [ σ ]ᵥ at W [ σ ]ᵥ `run M [ σ ]ᵤ finally (N [ extendₛ (extendₛ σ) ]ᵤ)
+  kernel K at V finally M [ σ ]ᵤ = 
+    kernel (K [ σ ]ₖ) at (V [ σ ]ᵥ) finally (M [ (extendₛ (extendₛ σ)) ]ᵤ)
 
   -- Kernel
-  sub-kernel k p [ σ ]ₖ = sub-kernel (k [ σ ]ₖ) p
-  return v [ σ ]ₖ = return (v [ σ ]ᵥ)
-  (v₁ · v₂) [ σ ]ₖ = (v₁ [ σ ]ᵥ) · (v₂ [ σ ]ᵥ)
-  `let k `in l [ σ ]ₖ = `let (k [ σ ]ₖ) `in (l [ (extendₛ σ) ]ₖ)
-  (match v `with k) [ σ ]ₖ = match v [ σ ]ᵥ `with (k [ (extendₛ (extendₛ σ)) ]ₖ)
-  opₖ op p v k [ σ ]ₖ = opₖ op p (v [ σ ]ᵥ) (k [ extendₛ σ ]ₖ)
-  getenv k [ σ ]ₖ = getenv (k [ (extendₛ σ) ]ₖ)
-  setenv v k [ σ ]ₖ = setenv (v [ σ ]ᵥ) (k [ σ ]ₖ)
-  user m `with k [ σ ]ₖ = user (m [ σ ]ᵤ) `with (k [ (extendₛ σ) ]ₖ)
+  sub-kernel K p [ σ ]ₖ = sub-kernel (K [ σ ]ₖ) p
+  return V [ σ ]ₖ = return (V [ σ ]ᵥ)
+  (V · W) [ σ ]ₖ = (V [ σ ]ᵥ) · (W [ σ ]ᵥ)
+  `let K `in L [ σ ]ₖ = `let (K [ σ ]ₖ) `in (L [ (extendₛ σ) ]ₖ)
+  (match V `with K) [ σ ]ₖ = match V [ σ ]ᵥ `with (K [ (extendₛ (extendₛ σ)) ]ₖ)
+  opₖ op x V K [ σ ]ₖ = opₖ op x (V [ σ ]ᵥ) (K [ extendₛ σ ]ₖ)
+  getenv K [ σ ]ₖ = getenv (K [ (extendₛ σ) ]ₖ)
+  setenv V K [ σ ]ₖ = setenv (V [ σ ]ᵥ) (K [ σ ]ₖ)
+  user M `with K [ σ ]ₖ = user (M [ σ ]ᵤ) `with (K [ (extendₛ σ) ]ₖ)

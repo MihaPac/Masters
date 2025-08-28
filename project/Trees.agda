@@ -33,19 +33,21 @@ open Terms G O
 -- A computation tree that hold values of type T in their leaves
 data Tree  (Σ : Sig) (X : Set) : Set where
   leaf : X → Tree Σ X
-  node : ∀ (op : Op) → (p : op ∈ₒ Σ) → (param : ⟦ param op ⟧g) → (t : (res : ⟦ result op ⟧g) → Tree Σ X) → Tree Σ X
+  node : ∀ (op : Op) → (x : op ∈ₒ Σ) → (param : ⟦ param op ⟧g) 
+    → (t : (res : ⟦ result op ⟧g) → Tree Σ X) → Tree Σ X
 
-aux : ∀{op Σ₁ Σ₂ } → op ∈ₒ Σ₁ → Σ₁ ⊆ₛ Σ₂ → op ∈ₒ Σ₂ -- auxilliary function for include-tree
-aux {op} p q = q op p
+coerce-signature : ∀{op Σ₁ Σ₂ } → op ∈ₒ Σ₁ → Σ₁ ⊆ₛ Σ₂ → op ∈ₒ Σ₂ -- auxilliary function for coerce-tree
+coerce-signature {op} x p = p op x
 
-include-tree : ∀ {Σ₁ Σ₂ X} → Σ₁ ⊆ₛ Σ₂ → Tree Σ₁ X → Tree Σ₂ X
-include-tree p (leaf x) = leaf x
-include-tree p (node op q param c) = node op (aux q p) param (λ res → include-tree p (c res))
+coerce-tree : ∀ {Σ₁ Σ₂ X} → Σ₁ ⊆ₛ Σ₂ → Tree Σ₁ X → Tree Σ₂ X
+coerce-tree p (leaf x) = leaf x
+coerce-tree p (node op x param C) = 
+    node op (coerce-signature x p) param (λ res → coerce-tree p (C res))
 
 -- Monadic bind for trees
 bind-tree : ∀ {Σ X Y} → (X → Tree Σ Y) → Tree Σ X → Tree Σ Y
 bind-tree f (leaf x) = f x
-bind-tree f (node op p param c) = node op p param (λ res → bind-tree f (c res))
+bind-tree f (node op x param C) = node op x param (λ res → bind-tree f (C res))
 
 map-tree : ∀ {Σ X Y} → (X → Y) → Tree Σ X → Tree Σ Y
 map-tree f t = bind-tree (leaf ∘ f) t
@@ -54,14 +56,15 @@ map-tree f t = bind-tree (leaf ∘ f) t
 tree-id : ∀ {X Σ} (t : Tree Σ X)
     → bind-tree leaf t ≡ t
 tree-id {X} {Σ} (leaf x) = refl
-tree-id {X} {Σ} (node op p param t) = cong (node op p param) 
+tree-id {X} {Σ} (node op x param t) = cong (node op x param) 
     (fun-ext (λ res → tree-id {X = X} {Σ = Σ} (t res)))
 
-bind-tree-assoc : {Σ : Sig} {X Y Z : Set} (c : Tree Σ X) (f : X → Tree Σ Y)
+bind-tree-assoc : {Σ : Sig} {X Y Z : Set} (t : Tree Σ X) (f : X → Tree Σ Y)
     (g : Y → Tree Σ Z) →
-    bind-tree g (bind-tree f c) ≡ bind-tree (λ x → bind-tree g (f x)) c
+    bind-tree g (bind-tree f t) ≡ bind-tree (λ x → bind-tree g (f x)) t
 bind-tree-assoc (leaf x) f g = refl
-bind-tree-assoc (node op p param c) f g = cong (node op p param) (fun-ext (λ res → bind-tree-assoc (c res) f g))
+bind-tree-assoc (node op x param C) f g = 
+    cong (node op x param) (fun-ext (λ res → bind-tree-assoc (C res) f g))
 
 -- Denotation of a user computation returning elements of X and performing operations Σ
 UComp : Sig → Set → Set
