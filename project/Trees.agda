@@ -68,8 +68,7 @@ bind-tree-assoc (node op x param C) f g =
 
 -- Denotation of a user computation returning elements of X and performing operations Σ
 UComp : Sig → Set → Set
-UComp Σ X = Tree Σ X --TODO: Prove that THIS/Tree(X) is a Monad, the UComp will be T, bind is the bind-tree, leaf is the unit η,
---when verifying equations keep in mind that you might have to use funext
+UComp Σ X = Tree Σ X 
 
 bind-user : ∀ {Σ X Y} → (X → UComp Σ Y) → UComp Σ X → UComp Σ Y
 bind-user = bind-tree
@@ -80,7 +79,6 @@ KComp Σ C X = C → Tree Σ (X × C)
 -- Monad1 - C → ? × C
 -- Monad2 - Tree Σ ?
 -- KComp is the combination of Monad1 and Monad2
--- TODO: Prove the Kernel is also a Monad (in this file, possibly)
 
 bind-kernel : ∀ {Σ C X Y} → (X → KComp Σ C Y) → KComp Σ C X → KComp Σ C Y
 bind-kernel f K C = bind-tree (λ {(x , C') → f x C'}) (K C)

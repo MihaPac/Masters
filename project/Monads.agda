@@ -69,7 +69,6 @@ TreeMonad   = record {
 
 
 UMonad : Monad {l} 
---TODO: this is the same as TreeMonad
 UMonad = record {
   T         = UComp Σ ;
   η         = leaf ;
@@ -90,7 +89,6 @@ KMonad C = record {
   where
     η-right-Kernel : {X : Set} (K : KComp Σ C X) 
       → bind-kernel (λ x C → leaf (x , C)) K ≡ K 
-      --TODO: rename things as you go so that it makes sense
     η-right-Kernel K = fun-ext λ C → η-right-Tree (K C)
 
     >>=-assoc-Kernel : {X Y Z : Set} (K : KComp Σ C X) 

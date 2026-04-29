@@ -54,21 +54,6 @@ interleaved mutual
   _[_]ᵤ : ∀{Γ Γ' X} → Γ' ⊢U: X → Sub Γ Γ' → Γ ⊢U: X
   _[_]ₖ : ∀{Γ Γ' X} → Γ' ⊢K: X → Sub Γ Γ' → Γ ⊢K: X
 
-  sub-coop : ∀ {Γ Γ' Σ C op} → co-op Γ Σ C op → Sub Γ' Γ → co-op Γ' Σ C op
-  sub-coop (sub-kernel K p) σ = sub-kernel (K [ (extendₛ σ) ]ₖ) p
-  sub-coop (return V) σ = return (V [ (extendₛ σ) ]ᵥ)
-  sub-coop (V · W) σ = (V [ extendₛ σ ]ᵥ) · (W [ (extendₛ σ) ]ᵥ)
-  sub-coop (`let K `in L) σ = 
-    `let K [ (extendₛ σ) ]ₖ `in (L [ (extendₛ (extendₛ σ)) ]ₖ)
-  sub-coop (match V `with K) σ = 
-    match (V [ extendₛ σ ]ᵥ) `with (K [ (extendₛ (extendₛ (extendₛ σ))) ]ₖ)
-  sub-coop (opₖ op x V K) σ = 
-    opₖ op x (V [ (extendₛ σ) ]ᵥ) (K [ (extendₛ (extendₛ σ)) ]ₖ)
-  sub-coop (getenv K) σ = getenv (K [ (extendₛ (extendₛ σ)) ]ₖ)
-  sub-coop (setenv V K) σ = setenv (V [ (extendₛ σ) ]ᵥ) (K [ (extendₛ σ) ]ₖ)
-  sub-coop (user M `with K) σ = 
-    user (M [ (extendₛ σ) ]ᵤ) `with (K [ (extendₛ (extendₛ σ)) ]ₖ)
-
   -- Value
   var x [ σ ]ᵥ = σ x
   sub-value V p [ σ ]ᵥ = sub-value (V [ σ ]ᵥ) p
@@ -76,7 +61,7 @@ interleaved mutual
   ⟨ V , W ⟩ [ σ ]ᵥ = ⟨ V [ σ ]ᵥ , W [ σ ]ᵥ ⟩
   (funU M) [ σ ]ᵥ = funU (M [ extendₛ σ ]ᵤ)
   (funK K) [ σ ]ᵥ = funK (K [ extendₛ σ ]ₖ)
-  runner R [ σ ]ᵥ = runner λ op x → sub-coop (R op x) σ
+  runner R [ σ ]ᵥ = runner λ op x → R op x [ extendₛ σ ]ₖ 
 
   -- User
   sub-user M p [ σ ]ᵤ = sub-user (M [ σ ]ᵤ) p

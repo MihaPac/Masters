@@ -22,7 +22,7 @@ record Ops (G : GTypes) : Set₁ where
     param  : Op → GType
     result : Op → GType
 
-  -- Operation signatures
+  -- Algebraic signatures
   Sig = Op → Bool
 
   _∈ₒ_ : Op → Sig → Set

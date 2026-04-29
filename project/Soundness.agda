@@ -243,7 +243,7 @@ mutual
                 {u = (⟦ M ⟧-user (η , res))}
                 {v = (⟦ M [ there ]ᵤᵣ ⟧-user ((η , res) , C'))}
                 (fun-ext (λ op' → fun-ext (λ x' → fun-ext (λ par' → 
-                    Eq.trans --{A = ⟦ C ⟧g → Tree Σ (Data.Product.Σ ⟦ result op' ⟧g (λ x → ⟦ C ⟧g))}
+                    Eq.trans
                         (begin 
                         ⟦ R op' x' ⟧-kernel (η , par')
                         ≡⟨ cong ⟦ R op' x' ⟧-kernel 

@@ -70,7 +70,7 @@ mutual
         ≡⟨ sub-wk idₛ η ⟩ 
         ⟦ (λ x → var (there x)) ⟧-sub (η , V) 
         ∎)
-
+        
     sub-V : ∀ { Γ Γ' X  } (σ : Sub Γ Γ') (η : ⟦ Γ ⟧-ctx) (V : Γ' ⊢V: X)
         → ⟦ V ⟧-value (⟦ σ ⟧-sub η) ≡ ⟦ V [ σ ]ᵥ ⟧-value η
     sub-V {Γ' = Γ' ∷ X} σ η (var here) = refl

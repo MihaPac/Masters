@@ -110,7 +110,7 @@ mutual
   ⟦ runner R ⟧-value η = λ op x param → ⟦ (R op x) ⟧-kernel (η , param)
 
   apply-runner : ∀ {Σ Σ' C X} → Runner Σ Σ' C → UComp Σ X → KComp Σ' C X
-  apply-runner R (leaf x) C = leaf (x , C)
+  apply-runner R (leaf x) = λ C → leaf (x , C)
   apply-runner R (node op x param κ) = bind-kernel (apply-runner R ∘ κ) (R op x param)
 
   kernel-to-user : ∀ {Σ X Y C} → KComp Σ C X → C → (X × C → UComp Σ Y) → UComp Σ Y

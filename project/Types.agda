@@ -57,11 +57,11 @@ interleaved mutual
                 → (X ×v Y) ⊑ᵥ (X' ×v Y')
 
 
-    ⊑ᵥ-Ufun : {X X' : VType} {Σ Σ' : UType}
+    ⊑ᵥ-Ufun : {X X' : VType} {Xᵤ Xᵤ' : UType}
                 → X' ⊑ᵥ X
-                → Σ ⊑ᵤ Σ'
+                → Xᵤ ⊑ᵤ Xᵤ'
                 -----------------------
-                → X ⟶ᵤ Σ ⊑ᵥ X' ⟶ᵤ Σ'
+                → X ⟶ᵤ Xᵤ ⊑ᵥ X' ⟶ᵤ Xᵤ'
 
     ⊑ᵥ-Kfun : {X X' : VType} {Xₖ Xₖ' : KType}
                 → X' ⊑ᵥ X
@@ -89,7 +89,7 @@ interleaved mutual
     ⊑ₖ-kernel : {X X' : VType} {Σ Σ' : Sig} {C C' : KState}
                 → X ⊑ᵥ X'
                 → Σ ⊆ₛ Σ'
-                → C ≡ C'
+                → C ≡ₖ C'
                 ---------------------------
                 → X ↯ Σ , C ⊑ₖ X' ↯ Σ' , C'
 
