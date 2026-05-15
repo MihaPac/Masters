@@ -27,38 +27,6 @@ open import Interpreter-Substitution G O
 open import Interpreter-Renaming G O
 open import Monads G O
 
---ren-coop-lemma1 : ∀ { Γ Γ' Σ C op} (ρ : Ren Γ Γ') (R : runner ?)
---    → R op x' [ extdᵣ ρ ]ₖᵣ ≡ {! coop  !}
-
-{-ren-coop-lemma2 : ∀ { Γ Γ' Σ C op} (coop : co-op Γ' Σ C op)
-    → coop [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ ≡ coop [ extdᵣ wkᵣ ∘ᵣ extdᵣ wkᵣ ]ₖᵣ 
-ren-coop-lemma2 (sub-kernel K p) = {!   !}
-ren-coop-lemma2 (return V) = {!   !}
-ren-coop-lemma2 (V · W) = {!   !}
-ren-coop-lemma2 (`let K `in L) = {!   !}
-ren-coop-lemma2 (match V `with K) = {!   !}
-ren-coop-lemma2 (opₖ op V W K) = {!   !}
-ren-coop-lemma2 (getenv K) = {!   !}
-ren-coop-lemma2 (setenv V K) = {!   !}
-ren-coop-lemma2 (user V `with K) = {!   !}-}
-
-rename-coop : ∀ { Γ Γ' Σ C op} → co-op Γ Σ C op → Ren Γ' Γ → co-op Γ' Σ C op
-rename-coop coop ρ = coop [ extdᵣ ρ ]ₖᵣ
-
-ren-coop-lemma : ∀ { Γ Γ' Σ C op} (ρ : Ren Γ Γ') (coop : co-op Γ' Σ C op)
-    → coop [ extdᵣ ρ ]ₖᵣ ≡ rename-coop coop ρ
-ren-coop-lemma ρ coop = refl
-
-{-ren-coop-lemma ρ (sub-kernel coop _) = refl
-ren-coop-lemma ρ (return _) = refl
-ren-coop-lemma ρ (_ · _) = refl
-ren-coop-lemma ρ (`let coop `in coop') = refl
-ren-coop-lemma ρ (match _ `with coop) = refl
-ren-coop-lemma ρ (opₖ op' _ _ coop) = refl
-ren-coop-lemma ρ (getenv coop) = refl
-ren-coop-lemma ρ (setenv _ coop) = refl
-ren-coop-lemma ρ (user _ `with coop) = refl-}
-
 mutual
 
     valid-V : ∀ {Γ : Ctx} {X : VType} {V W : Γ ⊢V: X} → (eq-V : Γ ⊢V V ≡ W) → ∀ η → ⟦ V ⟧-value η ≡ ⟦ W ⟧-value η
@@ -217,7 +185,7 @@ mutual
         {y = (λ { (X , C)
                 → ⟦
                 `using
-                runner (λ op₁ p₁ → R op₁ p₁ [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ ) --rename-coop (R op₁ p₁) (λ x → there (there x)))
+                runner (λ op₁ p₁ → R op₁ p₁ [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ )
                 at var here `run M [ there ]ᵤᵣ finally
                 (N [ extdᵣ (extdᵣ (λ x → there (there x))) ]ᵤᵣ)
                 ⟧-user
@@ -234,7 +202,7 @@ mutual
                 (⟦ M ⟧-user (η , res)) C')}
             {v = (apply-runner
                 (λ op₁ x param₁ →
-                    ⟦ rename-coop (R op₁ x) (λ x₁ → there (there x₁)) ⟧-kernel
+                    ⟦ R op₁ x [ extdᵣ (wkᵣ ∘ᵣ wkᵣ)]ₖᵣ ⟧-kernel
                     (((η , res) , C') , param₁))
                 (⟦ M [ there ]ᵤᵣ ⟧-user ((η , res) , C')) C')}
             (fun-ext (λ (X'' , C'') → 
@@ -268,7 +236,7 @@ mutual
             (cong₂ (λ a b → apply-runner a b C')
                 {x = (λ op₁ x₁ param₁ → ⟦ R op₁ x₁ ⟧-kernel (η , param₁))}
                 {y = (λ op₁ x param₁ →
-                    ⟦ rename-coop (R op₁ x) (λ x₁ → there (there x₁)) ⟧-kernel
+                    ⟦ R op₁ x [ extdᵣ (wkᵣ ∘ᵣ wkᵣ)]ₖᵣ ⟧-kernel
                     (((η , res) , C') , param₁))}
                 {u = (⟦ M ⟧-user (η , res))}
                 {v = (⟦ M [ there ]ᵤᵣ ⟧-user ((η , res) , C'))}
@@ -344,8 +312,8 @@ mutual
                         ∎
                         )
                         (cong (λ a → ⟦ a ⟧-kernel (((η , res) , C') , par'))
-                            {y = rename-coop (R op' x') (λ x₁ → there (there x₁))}
-                            (ren-coop-lemma (λ x₁ → there (there x₁)) (R op' x')))))))
+                            {y = R op' x' [ extdᵣ (wkᵣ ∘ᵣ wkᵣ)]ₖᵣ}
+                            refl )))))
                 (begin 
                 ⟦ M ⟧-user (η , res)
                 ≡⟨ cong ⟦ M ⟧-user 
@@ -379,7 +347,7 @@ mutual
           (λ { (X , C)
                  → ⟦
                    `using
-                   runner (λ op₁ p₁ → rename-coop (R op₁ p₁) (λ x → there (there x)))
+                   runner (λ op₁ x₁ → R op₁ x₁ [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ)
                    at var here `run M [ there ]ᵤᵣ finally
                    (N [ extdᵣ (extdᵣ (λ x → there (there x))) ]ᵤᵣ)
                    ⟧-user
@@ -389,7 +357,7 @@ mutual
         ≡⟨ refl ⟩
         ⟦
           kernel R op x [ var ∷ₛ param' ]ₖ at W finally
-          (`using runner (λ op₁ x₁ → R op₁ x₁ [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ) --(rename-runner R (λ x → there (there x)))
+          (`using runner (λ op₁ x₁ → R op₁ x₁ [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ) 
            at var here `run M [ there ]ᵤᵣ finally
            (N [ extdᵣ (extdᵣ (λ x → there (there x))) ]ᵤᵣ))
           ⟧-user
