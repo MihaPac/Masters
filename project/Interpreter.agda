@@ -98,7 +98,6 @@ mutual
 -- Denotations of terms
 mutual
 
---  sub-coop : ∀ { } →
 
   ⟦_⟧-value : ∀ {Γ X} → (Γ ⊢V: X) → ⟦ Γ ⟧-ctx → ⟦ X ⟧v
   ⟦ var x ⟧-value η = lookup x η

@@ -30,7 +30,7 @@ _∘ᵣ_ : ∀ {Γ Γ' Γ''} → Ren Γ' Γ'' → Ren Γ Γ' → Ren Γ Γ''
 wkᵣ : ∀ {Γ X} → Ren (Γ ∷ X) Γ
 wkᵣ x =  there x
 
--- exchange renaming
+-- extending renaming
 
 extdᵣ : ∀ {Γ Γ' X} → Ren Γ' Γ → Ren (Γ' ∷ X) (Γ ∷ X)
 extdᵣ ρ here = here

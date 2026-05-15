@@ -230,8 +230,8 @@ interleaved mutual
       → (N : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ')
       ------------
       → Γ ⊢U `using runner R at W `run (opᵤ op x V M) finally N
-          ≡ kernel R op x [ idₛ ∷ₛ V ]ₖ at W finally 
-            (`using (runner (rename-runner R (wkᵣ ∘ᵣ wkᵣ))) 
+        ≡ kernel R op x [ idₛ ∷ₛ V ]ₖ at W finally 
+            (`using (runner (λ op' x' → R op' x' [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ ))--[ (idᵣ ∘ᵣ extdᵣ wkᵣ) ∘ᵣ extdᵣ wkᵣ ]ₖᵣ )) 
               at var here `run M [ wkᵣ ]ᵤᵣ finally 
                 (N [ extdᵣ (extdᵣ (wkᵣ ∘ᵣ wkᵣ)) ]ᵤᵣ))
 

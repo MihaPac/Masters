@@ -23,8 +23,8 @@ open import Substitution G O
 open import Trees G O
 
 
-ren-coop-lemma : ∀ { Γ Γ' Σ C op} (ρ : Ren Γ Γ') (coop : co-op Γ' Σ C op)
-    → coop [ extdᵣ ρ ]ₖᵣ ≡ rename-coop coop ρ
+{-ren-coop-lemma : ∀ { Γ Γ' Σ C op} (ρ : Ren Γ Γ') (coop : co-op Γ' Σ C op)
+    → coop [ extdᵣ ρ ]ₖᵣ ≡ {!   !}
 ren-coop-lemma ρ (sub-kernel coop _) = refl
 ren-coop-lemma ρ (return _) = refl
 ren-coop-lemma ρ (_ · _) = refl
@@ -33,7 +33,7 @@ ren-coop-lemma ρ (match _ `with coop) = refl
 ren-coop-lemma ρ (opₖ op' _ _ coop) = refl
 ren-coop-lemma ρ (getenv coop) = refl
 ren-coop-lemma ρ (setenv _ coop) = refl
-ren-coop-lemma ρ (user _ `with coop) = refl
+ren-coop-lemma ρ (user _ `with coop) = refl-}
 
 mutual 
 
@@ -106,13 +106,13 @@ mutual
         ⟦ R op x' [ extdᵣ ρ ]ₖᵣ ⟧-kernel (η , par) 
         ≡⟨ cong₂ (λ a b → a b) 
                 {x = ⟦ R op x' [ extdᵣ ρ ]ₖᵣ ⟧-kernel}
-                {y = ⟦ rename-coop (R op x') ρ ⟧-kernel}
+                {y = ⟦ R op x' [ extdᵣ ρ ]ₖᵣ ⟧-kernel}
                 {u = η , par}
                 {v = η , par}
                 (cong ⟦_⟧-kernel 
                     {x = R op x' [ extdᵣ ρ ]ₖᵣ} 
-                    {y = rename-coop (R op x') ρ} 
-                    (ren-coop-lemma ρ (R op x')))
+                    {y = R op x' [ extdᵣ ρ ]ₖᵣ} 
+                    refl)
                 refl ⟩ 
         refl)))
 

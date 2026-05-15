@@ -23,19 +23,6 @@ open import Substitution G O
 open import Interpreter-Renaming G O
 open import Trees G O 
 
-sub-coop-lemma : ∀ { Γ Γ' Σ C op } (σ : Sub Γ Γ') (coop : co-op Γ' Σ C op)
-    → coop [ extendₛ σ ]ₖ  ≡ sub-coop coop σ
-sub-coop-lemma σ (sub-kernel coop _) = refl
-sub-coop-lemma σ (return _) = refl
-sub-coop-lemma σ (_ · _) = refl
-sub-coop-lemma σ (`let coop `in coop') = refl
-sub-coop-lemma σ (match _ `with coop) = refl
-sub-coop-lemma σ (opₖ op' _ _ coop) = refl
-sub-coop-lemma σ (getenv coop) = refl
-sub-coop-lemma σ (setenv _ coop) = refl
-sub-coop-lemma σ (user _ `with coop) = refl
-
-
 mutual
 -- Naming scheme for the various equalities:
 --   Γ ⊢V V ≡ W will be named eq-V, eq-W, ...
@@ -99,8 +86,6 @@ mutual
         ⟦ R op x ⟧-kernel (⟦ extendₛ {X = gnd (param op)} σ ⟧-sub (η , par)) 
         ≡⟨ sub-K (extendₛ σ) (η , par) (R op x) ⟩ 
         ⟦ R op x [ extendₛ σ ]ₖ ⟧-kernel (η , par)
-        ≡⟨ cong (λ a → ⟦ a ⟧-kernel (η , par)) {y = sub-coop (R op x) σ} (sub-coop-lemma σ (R op x)) ⟩ 
-        ⟦ sub-coop (R op x) σ ⟧-kernel (η , par)
         ≡⟨ refl ⟩
         refl
         )))
