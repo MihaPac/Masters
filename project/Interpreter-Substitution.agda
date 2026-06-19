@@ -205,7 +205,7 @@ mutual
                 refl)) 
         (cong₂ (λ x y → x y) 
             (sub-K σ η K) 
-            refl)) 
+            refl))
     sub-K σ η (match V `with K) = Eq.trans 
         (cong ⟦ K ⟧-kernel 
             (cong₂ _,_ 

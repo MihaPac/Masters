@@ -81,5 +81,5 @@ KComp Σ C X = C → Tree Σ (X × C)
 -- KComp is the combination of Monad1 and Monad2
 
 bind-kernel : ∀ {Σ C X Y} → (X → KComp Σ C Y) → KComp Σ C X → KComp Σ C Y
-bind-kernel f K C = bind-tree (λ {(x , C') → f x C'}) (K C)
+bind-kernel f K = λ C → bind-tree (λ {(x , C') → f x C'}) (K C)
 

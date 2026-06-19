@@ -83,7 +83,7 @@ KMonad C = record {
   T         = KComp Σ C ;
   η         = λ x C → leaf (x , C) ;
   _>>=_     = λ K f C → bind-kernel f K C ;
-  η-left    = λ x f → refl ;--λ C f → refl ;
+  η-left    = λ x f → refl ;
   η-right   = η-right-Kernel ;
   >>=-assoc = >>=-assoc-Kernel }
   where

@@ -68,14 +68,14 @@ mutual
     valid-U refl η = Eq.refl
     valid-U (sym eq-M) η = Eq.sym (valid-U eq-M η) 
     valid-U (trans eq-M eq-N) η = Eq.trans (valid-U eq-M η) (valid-U eq-N η) 
-    valid-U (return-cong eq-V) η = Eq.cong (λ x → leaf x) (valid-V eq-V η)
-    valid-U {Γ} {Xᵤ} {M} {N} (·-cong eq-V eq-W) η = 
-        cong₂ (λ V-value W-value → V-value W-value) 
+    valid-U (return-cong eq-V) η = Eq.cong leaf (valid-V eq-V η)
+    valid-U (·-cong eq-V eq-W) η = 
+        cong₂ (λ V W → V W) 
             (valid-V eq-V η) 
             (valid-V eq-W η)
     valid-U (opᵤ-cong p eq-V eq-M) η = cong₂ (node _ p) 
         (valid-V eq-V η) 
-        (fun-ext (λ res → valid-U eq-M (η , res))) 
+        (fun-ext (λ res → valid-U eq-M (η , res)))
     valid-U (let-in-cong eq-M eq-N) η = cong₂ bind-user 
         (fun-ext (λ x → valid-U eq-N (η , x))) 
         (valid-U eq-M η)
@@ -147,8 +147,8 @@ mutual
         ⟦ `using R at W `run return V finally M ⟧-user η
         ≡⟨ cong ⟦ M ⟧-user (cong₂ _,_ (cong₂ _,_ (sub-id-lemma η) refl) refl) ⟩ 
         ⟦ M ⟧-user
-          ((⟦ var ⟧-sub η , ⟦ V ⟧-value η) ,
-           ⟦ W ⟧-value η)
+            ((⟦ var ⟧-sub η , ⟦ V ⟧-value η) ,
+            ⟦ W ⟧-value η)
         ≡⟨ sub-U ((var ∷ₛ V) ∷ₛ W) η M ⟩ 
         ⟦ M [ (var ∷ₛ V) ∷ₛ W ]ᵤ ⟧-user η
         ∎
@@ -365,7 +365,7 @@ mutual
         ∎
     valid-U (kernel-at-finally-beta-return V C N) η = Eq.trans 
         (cong ⟦ N ⟧-user (cong (λ a → (a , ⟦ V ⟧-value η) , ⟦ C ⟧-value η) (sub-id-lemma η))) 
-        (sub-U ((var ∷ₛ V) ∷ₛ C) η N) 
+        (sub-U ((var ∷ₛ V) ∷ₛ C) η N)
     valid-U (kernel-at-finally-beta-getenv C K M) η = cong₂ bind-tree
         {x = (λ { (X , C) → ⟦ M ⟧-user ((η , X) , C) })}
         {y = (λ { (X , C) → ⟦ M ⟧-user ((η , X) , C) })}
@@ -425,11 +425,21 @@ mutual
     valid-K (sym eq-K) η = Eq.sym (valid-K eq-K η)
     valid-K (trans eq-K eq-L) η = Eq.trans (valid-K eq-K η) (valid-K eq-L η) 
     valid-K (return-cong eq-V) η = fun-ext (λ x → cong leaf (cong (λ y → (y , x)) (valid-V eq-V η))) 
-    valid-K (·-cong eq-V eq-W) η = cong₂ (λ V-value W-value → V-value W-value) (valid-V eq-V η) (valid-V eq-W η) 
+    valid-K (·-cong eq-V eq-W) η = cong₂ (λ V-value W-value → V-value W-value) 
+        (valid-V eq-V η) 
+        (valid-V eq-W η) 
     valid-K (let-in-cong eq-K eq-L) η = 
-        fun-ext (λ C → cong₂ bind-tree (fun-ext (λ x → cong (λ x₁ → x₁ (proj₂ x)) (valid-K eq-L (η , proj₁ x) )) )  (cong₂ (λ a b → a b) (valid-K eq-K η) refl) )
-    valid-K (match-with-cong eq-V eq-K) η = cong₂ (λ K V → K V) (fun-ext (λ η' → valid-K eq-K η' )) (cong (λ V → (( η , proj₁ V ) , proj₂ V)) (valid-V eq-V η))
-    valid-K (opₖ-cong {V} {W} {Σ} {C} {op} {x} {param} eq-V eq-K) η = 
+        fun-ext 
+        (λ C → cong₂ bind-tree 
+            (fun-ext (λ x → 
+                cong (λ x₁ → x₁ (proj₂ x)) 
+                    (valid-K eq-L (η , proj₁ x) )) )  
+            (cong₂ (λ a b → a b) (valid-K eq-K η) refl) )
+    valid-K (match-with-cong eq-V eq-K) η = cong₂ (λ K V → K V) 
+        (fun-ext (λ η' → valid-K eq-K η' )) 
+        (cong (λ V → (( η , proj₁ V ) , proj₂ V)) 
+            (valid-V eq-V η))
+    valid-K (opₖ-cong {op = op} {x = x} eq-V eq-K) η = 
         fun-ext (λ _ → cong₂ (node op x) 
             (valid-V eq-V η) 
             (fun-ext (λ res → cong₂ (λ k≡k' C → k≡k' C) 
@@ -437,7 +447,10 @@ mutual
                 refl ))) 
     valid-K (getenv-cong eq-K) η = fun-ext (λ C → cong₂ (λ k≡k' c' → k≡k' c') (valid-K eq-K (η , C)) refl)
     valid-K (setenv-cong eq-V eq-K) η = fun-ext (λ _ → cong₂ (λ K C → K C) (valid-K eq-K η) (valid-V eq-V η)) 
-    valid-K (user-with-cong eq-M eq-K) η = fun-ext (λ _ → cong₂ bind-tree (cong₂ (λ f C x → f x C) (fun-ext (λ x → valid-K eq-K (η , x) ))  refl) (valid-U eq-M η))  
+    valid-K (user-with-cong eq-M eq-K) η = fun-ext (λ _ → 
+        cong₂ bind-tree 
+            (cong₂ (λ f C x → f x C) (fun-ext (λ x → valid-K eq-K (η , x) ))  refl) 
+            (valid-U eq-M η))  
     valid-K (funK-beta K V) η = Eq.trans 
         (cong ⟦ K ⟧-kernel (cong (_, ⟦ V ⟧-value η) (sub-id-lemma η)))
         (sub-K (var ∷ₛ V) η K) 

@@ -56,7 +56,7 @@ mutual
   -- Idea: the elements of t!Σ are computations, each computation
   -- either returns a value of type t, or triggers an operation in Σ
   -- This is described by a *computation tree*:
-  -- * leaves: return value
+  -- * leafs: return value
   -- * tree node: labeled by an operation and a parameter,
   --              subtrees are computations
   ⟦_⟧u : UType → Set
@@ -84,15 +84,16 @@ mutual
   coerceᵥ (⊑ᵥ-product p q) (X , Y) = (coerceᵥ p X , coerceᵥ q Y)
   coerceᵥ (⊑ᵥ-Ufun p q) f = λ X' → coerceᵤ q (f (coerceᵥ p X'))
   coerceᵥ (⊑ᵥ-Kfun p q) f = λ X' → coerceₖ q (f (coerceᵥ p X'))
-  coerceᵥ (⊑ᵥ-runner p q refl) R = λ op x param C → coerce-tree q (R op (p _ x) param C)
+  coerceᵥ (⊑ᵥ-runner p q refl) R = λ op x param C → coerce-tree q (R op (coerce-signature x p) param C)
   
   -- Denotation of user computation subtyping
   coerceᵤ : ∀ {Xᵤ Yᵤ} → Xᵤ ⊑ᵤ Yᵤ → ⟦ Xᵤ ⟧u → ⟦ Yᵤ ⟧u
-  coerceᵤ (⊑ᵤ-user p q) M = coerce-tree q (map-tree (coerceᵥ p) M)
+  coerceᵤ (⊑ᵤ-user p q) M = coerce-tree q (bind-tree (leaf ∘ coerceᵥ p) M)
 
   -- Denotation of kernel computation subtyping
   coerceₖ : ∀ {Xₖ Yₖ} → Xₖ ⊑ₖ Yₖ → ⟦ Xₖ ⟧k → ⟦ Yₖ ⟧k
-  coerceₖ (⊑ₖ-kernel p q refl) K L = coerce-tree q (map-tree (λ {(X , C) → (coerceᵥ p X) , C}) (K L))
+  coerceₖ (⊑ₖ-kernel p q refl) K = λ C → coerce-tree q (bind-tree (leaf ∘ λ {(X , C) → coerceᵥ p X , C}) (K C)) 
+  --(map-tree (λ {(X , C) → (coerceᵥ p X) , C}) (K L))
 
 
 -- Denotations of terms
@@ -110,7 +111,7 @@ mutual
 
   apply-runner : ∀ {Σ Σ' C X} → Runner Σ Σ' C → UComp Σ X → KComp Σ' C X
   apply-runner R (leaf x) = λ C → leaf (x , C)
-  apply-runner R (node op x param κ) = bind-kernel (apply-runner R ∘ κ) (R op x param)
+  apply-runner R (node op x param κ) = bind-kernel ((apply-runner R) ∘ κ) (R op x param)
 
   kernel-to-user : ∀ {Σ X Y C} → KComp Σ C X → C → (X × C → UComp Σ Y) → UComp Σ Y
   kernel-to-user K C f = bind-user f (K C)
@@ -123,16 +124,19 @@ mutual
   ⟦ `let M `in N ⟧-user η = bind-user (λ X → ⟦ N ⟧-user (η , X)) (⟦ M ⟧-user η)
   ⟦ match V `with M ⟧-user η = ⟦ M ⟧-user ((η , (proj₁ (⟦ V ⟧-value η))) , (proj₂ (⟦ V ⟧-value η)))
   ⟦ `using R at C `run M finally N ⟧-user η =
-      kernel-to-user (apply-runner (⟦ R ⟧-value η) (⟦ M ⟧-user η)) (⟦ C ⟧-value η) (λ { (X , C') → ⟦ N ⟧-user ((η , X) , C')})
-  ⟦ kernel K at C finally M ⟧-user η = kernel-to-user  (⟦ K ⟧-kernel η) (⟦ C ⟧-value η) (λ {(X , C) → ⟦ M ⟧-user ((η , X) , C)})
+    bind-user (λ { (X , C') → ⟦ N ⟧-user ((η , X) , C')}) 
+      (apply-runner (⟦ R ⟧-value η) (⟦ M ⟧-user η) (⟦ C ⟧-value η)) 
+  ⟦ kernel K at C finally M ⟧-user η = 
+    bind-user (λ {(X , C) → ⟦ M ⟧-user ((η , X) , C)}) 
+      (⟦ K ⟧-kernel η (⟦ C ⟧-value η))
 
   ⟦_⟧-kernel : ∀ {Γ K} → (Γ ⊢K: K) → ⟦ Γ ⟧-ctx → ⟦ K ⟧k
   ⟦ sub-kernel K p ⟧-kernel η = coerceₖ p (⟦ K ⟧-kernel η)
-  ⟦ return V ⟧-kernel η C = leaf ((⟦ V ⟧-value η) , C)
+  ⟦ return V ⟧-kernel η = λ C → leaf ((⟦ V ⟧-value η) , C)
   ⟦ V · W ⟧-kernel η = ⟦ V ⟧-value η (⟦ W ⟧-value η)
   ⟦ `let K `in L ⟧-kernel η = bind-kernel (λ X → ⟦ L ⟧-kernel (η , X)) (⟦ K ⟧-kernel η)
   ⟦ match V `with K ⟧-kernel η = ⟦ K ⟧-kernel ((η , proj₁ (⟦ V ⟧-value η)) , proj₂ (⟦ V ⟧-value η))
-  ⟦ opₖ op x V K ⟧-kernel η C =  node op x (⟦ V ⟧-value η) (λ res → ⟦ K ⟧-kernel (η , res) C)
-  ⟦ getenv K ⟧-kernel η C = ⟦ K ⟧-kernel (η , C) C
+  ⟦ opₖ op x V K ⟧-kernel η = λ C → node op x (⟦ V ⟧-value η) (λ res → ⟦ K ⟧-kernel (η , res) C)
+  ⟦ getenv K ⟧-kernel η = λ C → ⟦ K ⟧-kernel (η , C) C
   ⟦ setenv V K ⟧-kernel η _ = ⟦ K ⟧-kernel η (⟦ V ⟧-value η)
-  ⟦ user M `with K ⟧-kernel η C = bind-user (λ X → ⟦ K ⟧-kernel (η , X) C) (⟦ M ⟧-user η)
+  ⟦ user M `with K ⟧-kernel η = λ C → bind-user (λ X → ⟦ K ⟧-kernel (η , X) C) (⟦ M ⟧-user η)

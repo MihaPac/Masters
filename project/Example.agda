@@ -67,7 +67,7 @@ module _ where
 
   -- Written in human form: x : 𝕟, y : 𝕓 ⊢ᵤ flip (⟨⟩, c . print (42, _ . return c))
   dog : [] ∷ gnd (base 𝕟) ∷ gnd (base 𝕓) ⊢U: (gnd (base 𝕓) ! λ { flip → true ; print → true})
-  dog = opᵤ flip refl ⟨⟩ (opᵤ print refl (var (there (there here))) (return (var (there here))))
+  dog = opᵤ flip refl ⟨⟩ (opᵤ print refl (var (there (there here))) {!   !}) --(return (var (there here))))
 
   tail = ⟦ dog ⟧-user ((tt , 42) , false)
   -- Normalize tail: node flip refl tt (λ c → node print refl 42 (λ _ → leaf c))

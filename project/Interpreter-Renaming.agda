@@ -23,18 +23,6 @@ open import Substitution G O
 open import Trees G O
 
 
-{-ren-coop-lemma : ∀ { Γ Γ' Σ C op} (ρ : Ren Γ Γ') (coop : co-op Γ' Σ C op)
-    → coop [ extdᵣ ρ ]ₖᵣ ≡ {!   !}
-ren-coop-lemma ρ (sub-kernel coop _) = refl
-ren-coop-lemma ρ (return _) = refl
-ren-coop-lemma ρ (_ · _) = refl
-ren-coop-lemma ρ (`let coop `in coop') = refl
-ren-coop-lemma ρ (match _ `with coop) = refl
-ren-coop-lemma ρ (opₖ op' _ _ coop) = refl
-ren-coop-lemma ρ (getenv coop) = refl
-ren-coop-lemma ρ (setenv _ coop) = refl
-ren-coop-lemma ρ (user _ `with coop) = refl-}
-
 mutual 
 
     ⟦_⟧-ren : ∀ {Γ Γ'} → Ren Γ Γ' → ⟦ Γ ⟧-ctx → ⟦ Γ' ⟧-ctx
@@ -61,15 +49,14 @@ mutual
         ∎) 
         refl
 
-    --lookup-ren
-    lookup-ren : ∀ { Γ Γ' V} (x : V ∈ Γ') (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx)
+    ren-value-var : ∀ { Γ Γ' V} (x : V ∈ Γ') (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx)
         → lookup x (⟦ ρ ⟧-ren η) ≡ lookup (ρ x) η
-    lookup-ren here ρ η = refl
-    lookup-ren (there x) ρ η = lookup-ren x (λ x → ρ (there x)) η
+    ren-value-var here ρ η = refl
+    ren-value-var (there x) ρ η = ren-value-var x (λ x → ρ (there x)) η
 
     ren-value : ∀ { Γ Γ' X} (V : Γ' ⊢V: X) (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx)
         → ⟦ V ⟧-value (⟦ ρ ⟧-ren η) ≡ ⟦ V [ ρ ]ᵥᵣ ⟧-value η
-    ren-value {Γ} {Γ'} (var x) ρ η = lookup-ren x ρ η
+    ren-value {Γ} {Γ'} (var x) ρ η = ren-value-var x ρ η
     ren-value {Γ} {Γ'} (sub-value V p) ρ η = cong (coerceᵥ p) 
         (ren-value V ρ η) 
     ren-value {Γ} {Γ'} ⟨⟩ ρ η = refl
@@ -224,7 +211,7 @@ mutual
     ren-kernel {Γ} {Γ'} {Xₖ} (var x · W) ρ η = cong₂ (λ a b → a b) 
         {x = lookup x (⟦ ρ ⟧-ren η)}{y = lookup (ρ x) η} 
         {u = ⟦ W ⟧-value (⟦ ρ ⟧-ren η)}{v = ⟦ W [ ρ ]ᵥᵣ ⟧-value η} 
-        (lookup-ren x ρ η) 
+        (ren-value (var x) ρ η)
         (ren-value W ρ η) 
     ren-kernel {Γ} {Γ'} {Xₖ} (sub-value V x · W) ρ η = cong₂ (λ a b → a b) 
         {x = coerceᵥ x (⟦ V ⟧-value (⟦ ρ ⟧-ren η))}{y = coerceᵥ x (⟦ V [ ρ ]ᵥᵣ ⟧-value η)}

@@ -9,7 +9,7 @@ import Denotations
 import Sub-Validity
 import Ren-Validity
 
-module Examples (G : GTypes) (O : Ops G) where
+module Examples2 (G : GTypes) (O : Ops G) where
 
 open GTypes G
 open Ops O
@@ -58,6 +58,7 @@ data ToyBase : Set where
   bool : ToyBase
   nat : ToyBase
 
+
 ⟦_⟧toy : ToyBase → Set
 ⟦ bool ⟧toy = Bool
 ⟦ nat ⟧toy = ℕ
@@ -70,12 +71,14 @@ toyGround = record { BaseType = ToyBase ; ⟦_⟧b = ⟦_⟧toy }
 -- print : 𝕟 → unit (idea: it prints a number to standard output)
 -- add : 𝕟 → 𝕟 → 𝕟 (idea: adds two numbers)
 -- lessthan : 𝕟 → 𝕟 → bool (idea: compares two numbers)
+-- multiply : 𝕟 → 𝕟 → 𝕟 (idea: multiplies two numbers)
 
 data ToyOp : Set where
   flip : ToyOp
   print : ToyOp
   add : ToyOp
   lessthan : ToyOp
+  multiply : ToyOp
 
 open GTypes
 
@@ -83,31 +86,42 @@ toyParam : ToyOp → GType toyGround
 toyParam flip = unit
 toyParam print = base nat
 toyParam add = base nat ×b base nat
-toyParam lessthan = (base nat) ×b base nat
+toyParam lessthan = base nat ×b base nat
+toyParam multiply = base nat ×b base nat
 
 toyResult : ToyOp → GType toyGround
 toyResult flip = base bool
 toyResult print = unit
 toyResult add = base nat
 toyResult lessthan = base bool
+toyResult multiply = base nat
 
 toyOps : Ops toyGround
 toyOps = record { Op = ToyOp ; param = toyParam ; result = toyResult }
 
--- example program written in this language
 module _ where
   open Contexts toyGround toyOps
   open Types toyGround toyOps
-  open Terms toyGround toyOps
+  open Terms toyGround toyOps 
+  open import Substitution toyGround toyOps
 
-  -- A user computation in context with one variable of type 𝕟
-  -- Written in human form: x : 𝕟, y : 𝕓 ⊢ᵤ print (x, _. return ⟨⟩)
-  -- Written in human form: x : nat, y : nat ⊢ᵤ add (x, y , _. return 〈〉)
-  cow : [] ∷ gnd (base nat ×b base nat) ⊢U: ((gnd (base nat)) ! λ {flip → false
-                                                      ; print → false
-                                                      ; add → true
-                                                      ; lessthan → false})
-  cow = opᵤ add refl (var here) (return (var here))
+  claw : Sub ([] ∷ gnd (base nat ×b base nat) ∷ gnd (base nat)) ([] ∷ gnd (base nat ×b base nat)) 
+  claw x = {!   !}
+
+  cat : ([] ∷ gnd (base nat ×b base nat)) ⊢U: gnd (base nat) ! λ {flip → false
+                                                                ; print → true
+                                                                ; add → true
+                                                                ; lessthan → false
+                                                                ; multiply → true}
+  cat = `let (opᵤ multiply refl (var here) (return (var here))) `in (opᵤ add refl {!  !} {!   !})
+
+  open Interpreter toyGround toyOps
+
+  hat = ⟦ cat ⟧-user (tt , 3 , 4)
+
+
+{-
+
   
   -- Let us compute the result of running cow in the runtime environment {x : 3 , 4}
   open Interpreter toyGround toyOps
@@ -135,3 +149,4 @@ module _ where
 
   tail = ⟦ dog ⟧-user ((tt , 42) , false)
   -- Normalize tail: node flip refl tt (λ c → node print refl 42 (λ _ → leaf c))
+-}
