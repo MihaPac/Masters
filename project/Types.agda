@@ -34,7 +34,7 @@ interleaved mutual
 
 -- Subtyping relations
 _⊆ₛ_ : Sig → Sig → Set
-Σ ⊆ₛ Σ' = (op : Op) → Σ op ≡ true → Σ' op ≡ true
+Σ ⊆ₛ Σ' = (op : Op) → op ∈ₒ Σ → op ∈ₒ Σ' 
 
 _≡ₖ_ : KState → KState → Set
 C ≡ₖ C' = C ≡ C'

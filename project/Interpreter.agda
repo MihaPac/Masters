@@ -50,7 +50,8 @@ mutual
 
   -- Denotation of a runner
   Runner : Sig → Sig → Set → Set
-  Runner Σ₁ Σ₂ C = ∀ (op : Op) → op ∈ₒ Σ₁ → ⟦ param op ⟧g → KComp Σ₂ C ⟦ result op ⟧g
+  Runner Σ₁ Σ₂ ⟦C⟧g = ∀ (op : Op) → op ∈ₒ Σ₁ 
+    → ⟦ param op ⟧g → KComp Σ₂ ⟦C⟧g ⟦ result op ⟧g
 
   -- Denotation of user computation types
   -- Idea: the elements of t!Σ are computations, each computation
@@ -82,8 +83,8 @@ mutual
   coerceᵥ : ∀ {X Y} → X ⊑ᵥ Y → ⟦ X ⟧v → ⟦ Y ⟧v
   coerceᵥ ⊑ᵥ-ground A = A
   coerceᵥ (⊑ᵥ-product p q) (X , Y) = (coerceᵥ p X , coerceᵥ q Y)
-  coerceᵥ (⊑ᵥ-Ufun p q) f = λ X' → coerceᵤ q (f (coerceᵥ p X'))
-  coerceᵥ (⊑ᵥ-Kfun p q) f = λ X' → coerceₖ q (f (coerceᵥ p X'))
+  coerceᵥ (⊑ᵥ-Ufun p q) X = λ X' → coerceᵤ q (X (coerceᵥ p X'))
+  coerceᵥ (⊑ᵥ-Kfun p q) X = λ X' → coerceₖ q (X (coerceᵥ p X'))
   coerceᵥ (⊑ᵥ-runner p q refl) R = λ op x param C → coerce-tree q (R op (coerce-signature x p) param C)
   
   -- Denotation of user computation subtyping

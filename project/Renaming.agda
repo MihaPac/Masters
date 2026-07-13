@@ -61,9 +61,9 @@ interleaved mutual
   `let M `in N [ ρ ]ᵤᵣ = `let M [ ρ ]ᵤᵣ `in (N [ extdᵣ ρ ]ᵤᵣ )
   (match M `with N) [ ρ ]ᵤᵣ = 
     match M [ ρ ]ᵥᵣ `with (N [ extdᵣ (extdᵣ ρ) ]ᵤᵣ)
-  `using R at N `run K finally L [ ρ ]ᵤᵣ = 
-    `using R [ ρ ]ᵥᵣ at N [ ρ ]ᵥᵣ 
-      `run K [ ρ ]ᵤᵣ finally (L [ extdᵣ (extdᵣ ρ) ]ᵤᵣ)
+  `using R at M `run K finally N [ ρ ]ᵤᵣ = 
+    `using R [ ρ ]ᵥᵣ at M [ ρ ]ᵥᵣ 
+      `run K [ ρ ]ᵤᵣ finally (N [ extdᵣ (extdᵣ ρ) ]ᵤᵣ)
   kernel K at M finally N [ ρ ]ᵤᵣ = 
     kernel K [ ρ ]ₖᵣ at M [ ρ ]ᵥᵣ finally (N [ extdᵣ (extdᵣ ρ) ]ᵤᵣ)
 

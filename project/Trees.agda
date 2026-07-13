@@ -41,8 +41,8 @@ coerce-signature {op} x p = p op x
 
 coerce-tree : ∀ {Σ₁ Σ₂ X} → Σ₁ ⊆ₛ Σ₂ → Tree Σ₁ X → Tree Σ₂ X
 coerce-tree p (leaf x) = leaf x
-coerce-tree p (node op x param C) = 
-    node op (coerce-signature x p) param (λ res → coerce-tree p (C res))
+coerce-tree p (node op x param κ) = 
+    node op (coerce-signature x p) param (λ res → coerce-tree p (κ res))
 
 -- Monadic bind for trees
 bind-tree : ∀ {Σ X Y} → (X → Tree Σ Y) → Tree Σ X → Tree Σ Y
