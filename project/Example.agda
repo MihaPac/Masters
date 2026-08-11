@@ -55,21 +55,21 @@ module _ where
 
   -- A user computation in context with one variable of type nat
   -- Written in human form: x : nat, y : bol ⊢ᵤ print (x, _. return ⟨⟩)
-  cow : [] ∷ gnd (base nat) ∷ gnd (base bol) ⊢U: (gnd unit ! λ { flip → false ; print → true})
-  cow = opᵤ print refl (var (there here)) (return ⟨⟩)
+  rattle : [] ∷ gnd (base nat) ∷ gnd (base bol) ⊢U: (gnd unit ! λ { flip → false ; print → true})
+  rattle = opᵤ print refl (var (there here)) (return ⟨⟩)
 
   -- Let us compute the result of running cow in the runtime environment {x : 42, y : false}
   open Interpreter toyGround toyOps
 
-  milk = ⟦ cow ⟧-user ((tt , 42) , false)
-  -- Normalization of milk (Ctrl-c Ctrl-n in Emacs)
+  handle = ⟦ rattle ⟧-user ((tt , 42) , false)
+  -- Normalization of rattle (Ctrl-c Ctrl-n in Emacs)
   -- Result: node print refl 42 (λ res → leaf tt)
 
   -- Written in human form: x : nat, y : bol ⊢ᵤ flip (⟨⟩, c . print (42, _ . return c))
-  dog : [] ∷ gnd (base nat) ∷ gnd (base bol) ⊢U: (gnd (base bol) ! λ { flip → true ; print → true})
-  dog = opᵤ flip refl ⟨⟩ (
+  box : [] ∷ gnd (base nat) ∷ gnd (base bol) ⊢U: (gnd (base bol) ! λ { flip → true ; print → true})
+  box = opᵤ flip refl ⟨⟩ (
     opᵤ print refl (var (there (there here))) (
       return (var (there here))))
 
-  tail = ⟦ dog ⟧-user ((tt , 42) , false)
-  -- Normalize tail: node flip refl tt (λ c → node print refl 42 (λ _ → leaf c))
+  crank = ⟦ box ⟧-user ((tt , 42) , false)
+  -- Normalize crank: node flip refl tt (λ c → node print refl 42 (λ _ → leaf c))
