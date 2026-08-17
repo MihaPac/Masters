@@ -76,25 +76,27 @@ toyGround = record { BaseType = ToyBase ; ⟦_⟧b = ⟦_⟧toy }
 data ToyOp : Set where
   flip : ToyOp
   print : ToyOp
-  add : ToyOp
-  lessthan : ToyOp
-  multiply : ToyOp
+  --add : ToyOp
+  --add : ToyOp
+  --lessthan : ToyOp
+  --multiply : ToyOp
 
 open GTypes
 
 toyParam : ToyOp → GType toyGround
 toyParam flip = unit
 toyParam print = base nat
-toyParam add = base nat ×b base nat
-toyParam lessthan = base nat ×b base nat
-toyParam multiply = base nat ×b base nat
+--toyParam add = base nat ×b base nat
+--toyParam add = base nat ×b base nat
+--toyParam lessthan = base nat ×b base nat
+--toyParam multiply = base nat ×b base nat
 
 toyResult : ToyOp → GType toyGround
 toyResult flip = base bool
 toyResult print = unit
-toyResult add = base nat
-toyResult lessthan = base bool
-toyResult multiply = base nat
+--toyResult add = base nat
+--toyResult lessthan = base bool
+--toyResult multiply = base nat
 
 toyOps : Ops toyGround
 toyOps = record { Op = ToyOp ; param = toyParam ; result = toyResult }
@@ -108,45 +110,89 @@ module _ where
   claw : Sub ([] ∷ gnd (base nat ×b base nat) ∷ gnd (base nat)) ([] ∷ gnd (base nat ×b base nat)) 
   claw x = {!   !}
 
+  product : ([] ∷ gnd (base nat)) ∷ gnd (base nat) ⊢V: (gnd (base nat) ×v gnd (base nat))
+  product = ⟨ (var here) , (var (there here)) ⟩
+
+  addition : [] ∷ (gnd (base nat) ×v gnd (base nat)) ⊢U: gnd (base nat) ! {!   !} 
+  addition = {! funU ?  !}
+
+  addition2 : {!   !} ⊢V: {!   !}
+  addition2 = funU addition
+
+{-
+  -- Breaks up product
+  matcher : ([] ∷ (gnd (base nat) ×v gnd (base nat))) ⊢V: {!   !}
+  matcher = {!   !}
+
+  addition : [] ∷ (gnd (base nat) ×v gnd (base nat)) ⊢V: (gnd (base nat)) --! {!   !})
+  addition = {!   !} --match (var here) `with {!   !}
+
+  addition2 : [] ∷ (gnd (base nat)) ∷ gnd (base nat) ⊢V: (gnd (base nat ×b base nat)) --! {!   !})
+  addition2 = {!   !}
+
+  addition3 : [] ∷ (gnd (base nat)) ∷ gnd (base nat) ⊢U: (gnd (base nat ×b base nat)) ! {!   !}
+  addition3 = {!   !}
+
+  addition4 : [] ∷ (gnd (base nat) ×v gnd (base nat)) ⊢U: (gnd (base nat ×b base nat)) ! {!   !}
+  addition4 = match (var here) `with (return {!   !})
+
+  poganjalec : co-op {!   !} {!   !} {!   !} {!   !}
+  poganjalec = {!   !}
+-}
+
+
+
+
+
+  --uporabniška izračuna za mačko
+
+
+  Sigma : Ops.Sig toyOps
+  Sigma flip = false
+  Sigma print = true
+
+  Sigma' : Ops.Sig toyOps
+  Sigma' flip = true
+  Sigma' print = false 
+
+  rat : [] ∷ gnd (base nat) ∷ gnd (base bool) ⊢V: ({!   !} ⇒ {!   !} , {!   !})
+  rat = runner λ {flip x → return (var (there here))
+                ; print x → return ⟨⟩}
+
+  paw1 : [] ∷ gnd (base nat) ∷ gnd (base bool) ⊢U: (gnd unit ! Sigma)
+  paw1 = opᵤ print refl (var (there here)) (return ⟨⟩)
+
+  paw2 : (([] ∷ gnd (base nat) ∷ gnd (base bool)) ∷ gnd unit) ∷
+    gnd unit ⊢U: ({!   !} ! Sigma')
+  paw2 = opᵤ flip {!   !} {!   !} {!   !}
+  
+  cat : {!   !} ⊢U: ({!   !} ! Sigma')
+  cat = `using rat at {!   !} `run paw1 finally paw2
+
+{-
+  paw1 : ([] ∷ gnd (base nat)) ⊢U: (gnd (base nat) ! Sigma)
+  paw1 = return (var here)
+
+  paw2 : [] ∷ gnd (base nat) ∷ gnd (base nat) ∷ gnd (base nat) ⊢U: (gnd unit ! Sigma')
+  paw2 = opᵤ print refl (var (there here)) (return ⟨⟩)
+
+-- Če pravilno razumem, bomo lahko uporabili drugačne sigme za run, in potem 
+  cat : ([] ∷ gnd (base nat)) ⊢U: (gnd unit ! Sigma') 
+  cat = `using rat at var here `run paw1 finally paw2
+  open Interpreter toyGround toyOps
+
+--  hat = ⟦ cat ⟧-user (tt , 3 , 4)
+
+  bag = ⟦ cat ⟧-user (tt , 10) --⟦ cat ⟧-user (tt , 10)
+
+-}
+
+{-
   cat : ([] ∷ gnd (base nat ×b base nat)) ⊢U: gnd (base nat) ! λ {flip → false
                                                                 ; print → true
                                                                 ; add → true
                                                                 ; lessthan → false
                                                                 ; multiply → true}
-  cat = `let (opᵤ multiply refl (var here) (return (var here))) `in (opᵤ add refl {!  !} {!   !})
-
-  open Interpreter toyGround toyOps
-
-  hat = ⟦ cat ⟧-user (tt , 3 , 4)
-
-
-{-
-
-  
-  -- Let us compute the result of running cow in the runtime environment {x : 3 , 4}
-  open Interpreter toyGround toyOps
-
-  milk = ⟦ cow ⟧-user (tt , 3 , 4)
-  -- Normalization of milk (Ctrl-c Ctrl-n in Emacs)
-  -- Result: node add refl (3 , 4) (λ res → leaf res)
-
-   -- A user computation in context with one variable of type 𝕟
-  -- Written in human form: x : 𝕟, y : 𝕓 ⊢ᵤ print {!   !}x, _. return ⟨⟩)
---  cow : [] ∷ gnd (base nat) ∷ gnd (base bool) ⊢U: (gnd unit ! λ { flip → false ; print → true})
---  cow = opᵤ print refl (var (there here)) (return ⟨⟩)
-
-  -- Let us compute the result of running cow in the runtime environment {x : 42, y : false}
---  open Interpreter toyGround toyOps
-
---  milk = ⟦ cow ⟧-user ((tt , 42) , false)
-  -- Normalization of milk (Ctrl-c Ctrl-n in Emacs)
-  -- Result: node print refl 42 (λ res → leaf tt)
-
-  -- Written in human form: x : nat, y : bool ⊢ᵤ flip (⟨⟩, c . print (42, _ . return c))
-  dog : [] ∷ gnd (base nat) ∷ gnd (base bool) ⊢U: (gnd (base bool) ! λ { flip → true ; print → true
-                                                                        ; add → false ; lessthan → false})
-  dog = opᵤ flip refl ⟨⟩ (opᵤ print refl (var (there (there here))) (return (var (there here))))
-
-  tail = ⟦ dog ⟧-user ((tt , 42) , false)
-  -- Normalize tail: node flip refl tt (λ c → node print refl 42 (λ _ → leaf c))
+  cat = `let (opᵤ multiply refl (var here) (return (var here))) `in {!   !}
+  --(opᵤ add refl {! _·_  !} {!   !})
 -}
