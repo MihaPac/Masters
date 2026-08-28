@@ -58,8 +58,9 @@ mutual
         ⟦ (λ x → var (there x)) ⟧-sub (η , V) 
         ∎)
         
-    sub-V : ∀ { Γ Γ' X  } (σ : Sub Γ Γ') (η : ⟦ Γ ⟧-ctx) (V : Γ' ⊢V: X)
-        → ⟦ V ⟧-value (⟦ σ ⟧-sub η) ≡ ⟦ V [ σ ]ᵥ ⟧-value η
+    sub-V : ∀ { Γ Γ' X  } (
+        σ : Sub Γ Γ') (η : ⟦ Γ ⟧-ctx) (V : Γ' ⊢V: X) → 
+        ⟦ V ⟧-value (⟦ σ ⟧-sub η) ≡ ⟦ V [ σ ]ᵥ ⟧-value η
     sub-V {Γ' = Γ' ∷ X} σ η (var here) = refl
     sub-V {Γ' = Γ' ∷ X} σ η (var (there x)) = sub-V {Γ' = Γ'} (σ ∘ (there {Y = X})) η (var x)
     sub-V σ η (sub-value V p) = cong (coerceᵥ p) (sub-V σ η V)
@@ -91,8 +92,9 @@ mutual
         )))
     --POTENTIAL TODO 11. 3.: use begin_ syntactic sugar to make the proofs prettier. 
 
-    sub-U : ∀ { Γ Γ' Xᵤ } (σ : Sub Γ Γ') (η : ⟦ Γ ⟧-ctx) (M : Γ' ⊢U: Xᵤ)
-        → ⟦ M ⟧-user (⟦ σ ⟧-sub η) ≡ ⟦ M [ σ ]ᵤ ⟧-user η
+    sub-U : ∀ { Γ Γ' Xᵤ } 
+        (σ : Sub Γ Γ') (η : ⟦ Γ ⟧-ctx) (M : Γ' ⊢U: Xᵤ) → 
+        ⟦ M ⟧-user (⟦ σ ⟧-sub η) ≡ ⟦ M [ σ ]ᵤ ⟧-user η
     sub-U σ η (sub-user M p) = cong (coerceᵤ p) (sub-U σ η M)
     sub-U σ η (return V) = cong leaf (sub-V σ η V) 
     sub-U σ η (V · W) = cong₂ (λ a b → a b) (sub-V σ η V) (sub-V σ η W)
@@ -186,26 +188,34 @@ mutual
                     (sub-K σ η K) 
                     (sub-V σ η C))
 
-    sub-K : ∀ { Γ Γ' Xₖ  } (σ : Sub Γ Γ') (η : ⟦ Γ ⟧-ctx) (K : Γ' ⊢K: Xₖ)
-        → (⟦ K ⟧-kernel (⟦ σ ⟧-sub η)) ≡ (⟦ K [ σ ]ₖ ⟧-kernel η) 
-    sub-K σ η (sub-kernel K p) = cong (coerceₖ p) (sub-K σ η K) 
-    sub-K σ η (return V) = fun-ext (λ C → cong leaf (cong₂ _,_ (sub-V σ η V) refl))
-    sub-K σ η (V · W) = cong₂ (λ x y → x y) (sub-V σ η V) (sub-V σ η W)
-    sub-K σ η (`let K `in L) = fun-ext (λ C → cong₂ bind-tree 
-        (fun-ext (λ (X , C') → cong₂ (λ a b → a b) 
-            {x = ⟦ L ⟧-kernel (⟦ σ ⟧-sub η , X)}
-            {y = ⟦ L [ extendₛ σ ]ₖ ⟧-kernel (η , X)}
-            {u = C'}
-            {v = C'}
-                (Eq.trans
-                    (cong ⟦ L ⟧-kernel (cong₂ _,_
-                        (sub-wk σ η)
-                        refl))
-                    (sub-K (extendₛ σ) (η , X) L))
-                refl)) 
-        (cong₂ (λ x y → x y) 
+    sub-K : ∀ { Γ Γ' Xₖ  } 
+        (σ : Sub Γ Γ') (η : ⟦ Γ ⟧-ctx) (K : Γ' ⊢K: Xₖ) → 
+        (⟦ K ⟧-kernel (⟦ σ ⟧-sub η)) ≡ (⟦ K [ σ ]ₖ ⟧-kernel η) 
+    sub-K σ η (sub-kernel K p) = 
+        cong (coerceₖ p) 
             (sub-K σ η K) 
-            refl))
+    sub-K σ η (return V) = fun-ext (λ C → 
+        cong leaf 
+            (cong₂ _,_ (sub-V σ η V) refl))
+    sub-K σ η (V · W) = cong₂ (λ x y → x y) 
+        (sub-V σ η V) 
+        (sub-V σ η W)
+    sub-K σ η (`let K `in L) = fun-ext (λ C → 
+        cong₂ bind-tree 
+            (fun-ext (λ (X , C') → cong₂ (λ a b → a b) 
+                {x = ⟦ L ⟧-kernel (⟦ σ ⟧-sub η , X)}
+                {y = ⟦ L [ extendₛ σ ]ₖ ⟧-kernel (η , X)}
+                {u = C'}
+                {v = C'}
+                    (Eq.trans
+                        (cong ⟦ L ⟧-kernel (cong₂ _,_
+                            (sub-wk σ η)
+                            refl))
+                        (sub-K (extendₛ σ) (η , X) L))
+                    refl)) 
+            (cong₂ (λ x y → x y) 
+                (sub-K σ η K) 
+                refl))
     sub-K σ η (match V `with K) = Eq.trans 
         (cong ⟦ K ⟧-kernel 
             (cong₂ _,_ 

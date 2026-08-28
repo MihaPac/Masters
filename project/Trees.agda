@@ -33,8 +33,8 @@ open Terms G O
 -- A computation tree that hold values of type T in their leaves
 data Tree  (Σ : Sig) (X : Set) : Set where
   leaf : X → Tree Σ X
-  node : ∀ (op : Op) → (x : op ∈ₒ Σ) → (param : ⟦ param op ⟧g) 
-    → (t : (res : ⟦ result op ⟧g) → Tree Σ X) → Tree Σ X
+  node : ∀ (op : Op) → (op ∈ₒ Σ) → (⟦ param op ⟧g) 
+    → ((⟦ result op ⟧g) → Tree Σ X) → Tree Σ X
 
 coerce-signature : ∀{op Σ₁ Σ₂ } → op ∈ₒ Σ₁ → Σ₁ ⊆ₛ Σ₂ → op ∈ₒ Σ₂ -- auxilliary function for coerce-tree
 coerce-signature {op} x p = p op x
@@ -42,12 +42,21 @@ coerce-signature {op} x p = p op x
 coerce-tree : ∀ {Σ₁ Σ₂ X} → Σ₁ ⊆ₛ Σ₂ → Tree Σ₁ X → Tree Σ₂ X
 coerce-tree p (leaf x) = leaf x
 coerce-tree p (node op x param κ) = 
-    node op (coerce-signature x p) param (λ res → coerce-tree p (κ res))
+    node 
+        op 
+        (coerce-signature x p) 
+        param 
+        (λ res → coerce-tree p (κ res))
 
 -- Monadic bind for trees
 bind-tree : ∀ {Σ X Y} → (X → Tree Σ Y) → Tree Σ X → Tree Σ Y
 bind-tree f (leaf x) = f x
-bind-tree f (node op x param C) = node op x param (λ res → bind-tree f (C res))
+bind-tree f (node op x param C) = 
+    node 
+        op 
+        x 
+        param 
+        (λ res → bind-tree f (C res))
 
 map-tree : ∀ {Σ X Y} → (X → Y) → Tree Σ X → Tree Σ Y
 map-tree f t = bind-tree (leaf ∘ f) t
@@ -81,5 +90,5 @@ KComp Σ C X = C → Tree Σ (X × C)
 -- KComp is the combination of Monad1 and Monad2
 
 bind-kernel : ∀ {Σ C X Y} → (X → KComp Σ C Y) → KComp Σ C X → KComp Σ C Y
-bind-kernel f K = λ C → bind-tree (λ {(x , C') → f x C'}) (K C)
+bind-kernel f K = λ c → bind-tree (λ {(x , c') → f x c'}) (K c)
 

@@ -54,8 +54,9 @@ mutual
     ren-value-var here ρ η = refl
     ren-value-var (there x) ρ η = ren-value-var x (λ x → ρ (there x)) η
 
-    ren-value : ∀ { Γ Γ' X} (V : Γ' ⊢V: X) (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx)
-        → ⟦ V ⟧-value (⟦ ρ ⟧-ren η) ≡ ⟦ V [ ρ ]ᵥᵣ ⟧-value η
+    ren-value : ∀ { Γ Γ' X} 
+        (V : Γ' ⊢V: X) (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx) → 
+        ⟦ V ⟧-value (⟦ ρ ⟧-ren η) ≡ ⟦ V [ ρ ]ᵥᵣ ⟧-value η
     ren-value {Γ} {Γ'} (var x) ρ η = ren-value-var x ρ η
     ren-value {Γ} {Γ'} (sub-value V p) ρ η = cong (coerceᵥ p) 
         (ren-value V ρ η) 
@@ -103,8 +104,9 @@ mutual
                 refl ⟩ 
         refl)))
 
-    ren-user : ∀ { Γ Γ' Xᵤ} (M : Γ' ⊢U: Xᵤ) (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx)
-        → ⟦ M ⟧-user (⟦ ρ ⟧-ren η) ≡ ⟦ M [ ρ ]ᵤᵣ ⟧-user η
+    ren-user : ∀ { Γ Γ' Xᵤ} 
+        (M : Γ' ⊢U: Xᵤ) (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx) → 
+        ⟦ M ⟧-user (⟦ ρ ⟧-ren η) ≡ ⟦ M [ ρ ]ᵤᵣ ⟧-user η
     ren-user {Γ} {Γ'} {Xᵤ} (sub-user M p) ρ η = 
         cong (coerceᵤ p) (ren-user M ρ η) 
     ren-user {Γ} {Γ'} {Xᵤ} (return V) ρ η = cong leaf (ren-value V ρ η)
@@ -204,8 +206,9 @@ mutual
             (ren-value C ρ η)) 
 
 
-    ren-kernel : ∀ { Γ Γ' Xₖ} (K : Γ' ⊢K: Xₖ) (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx)
-        → ⟦ K ⟧-kernel (⟦ ρ ⟧-ren η) ≡ ⟦ K [ ρ ]ₖᵣ ⟧-kernel η
+    ren-kernel : ∀ { Γ Γ' Xₖ} 
+        (K : Γ' ⊢K: Xₖ) (ρ : Ren Γ Γ') (η : ⟦ Γ ⟧-ctx) → 
+        ⟦ K ⟧-kernel (⟦ ρ ⟧-ren η) ≡ ⟦ K [ ρ ]ₖᵣ ⟧-kernel η
     ren-kernel {Γ} {Γ'} {Xₖ} (sub-kernel K p) ρ η = cong (coerceₖ p) (ren-kernel K ρ η)
     ren-kernel {Γ} {Γ'} {Xₖ} (return V) ρ η = fun-ext (λ C → cong leaf (cong₂ _,_ (ren-value V ρ η) refl))  
     ren-kernel {Γ} {Γ'} {Xₖ} (var x · W) ρ η = cong₂ (λ a b → a b) 

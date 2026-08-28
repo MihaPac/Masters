@@ -55,24 +55,30 @@ interleaved mutual
   _[_]ₖ : ∀{Γ Γ' X} → Γ' ⊢K: X → Sub Γ Γ' → Γ ⊢K: X
 
   -- Value
-  var x [ σ ]ᵥ = σ x
+  var x [ σ ]ᵥ         = σ x
   sub-value V p [ σ ]ᵥ = sub-value (V [ σ ]ᵥ) p
-  ⟨⟩ [ σ ]ᵥ = ⟨⟩
-  ⟨ V , W ⟩ [ σ ]ᵥ = ⟨ V [ σ ]ᵥ , W [ σ ]ᵥ ⟩
-  (funU M) [ σ ]ᵥ = funU (M [ extendₛ σ ]ᵤ)
-  (funK K) [ σ ]ᵥ = funK (K [ extendₛ σ ]ₖ)
-  runner R [ σ ]ᵥ = runner λ op x → R op x [ extendₛ σ ]ₖ 
+  ⟨⟩ [ σ ]ᵥ            = ⟨⟩
+  ⟨ V , W ⟩ [ σ ]ᵥ     = ⟨ V [ σ ]ᵥ , W [ σ ]ᵥ ⟩
+  (funU M) [ σ ]ᵥ      = funU (M [ extendₛ σ ]ᵤ)
+  (funK K) [ σ ]ᵥ      = funK (K [ extendₛ σ ]ₖ)
+  runner R [ σ ]ᵥ      = runner λ op x → R op x [ extendₛ σ ]ₖ 
 
   -- User
-  sub-user M p [ σ ]ᵤ = sub-user (M [ σ ]ᵤ) p
-  return V [ σ ]ᵤ = return (V [ σ ]ᵥ)
-  (V · W) [ σ ]ᵤ = (V [ σ ]ᵥ) · (W [ σ ]ᵥ)
-  opᵤ op x V M [ σ ]ᵤ = opᵤ op x (V [ σ ]ᵥ) (M [ extendₛ σ ]ᵤ)
-  `let M `in N [ σ ]ᵤ = `let M [ σ ]ᵤ `in (N [ (extendₛ σ) ]ᵤ)
-  (match V `with M) [ σ ]ᵤ = match (V [ σ ]ᵥ) `with (M [ (extendₛ (extendₛ σ)) ]ᵤ)
+  sub-user M p [ σ ]ᵤ                   = 
+    sub-user (M [ σ ]ᵤ) p
+  return V [ σ ]ᵤ                       = 
+    return (V [ σ ]ᵥ)
+  (V · W) [ σ ]ᵤ                        = 
+    (V [ σ ]ᵥ) · (W [ σ ]ᵥ)
+  opᵤ op x V M [ σ ]ᵤ                   = 
+    opᵤ op x (V [ σ ]ᵥ) (M [ extendₛ σ ]ᵤ)
+  `let M `in N [ σ ]ᵤ                   = 
+    `let M [ σ ]ᵤ `in (N [ (extendₛ σ) ]ᵤ)
+  (match V `with M) [ σ ]ᵤ              = 
+    match (V [ σ ]ᵥ) `with (M [ (extendₛ (extendₛ σ)) ]ᵤ)
   `using V at W `run M finally N [ σ ]ᵤ = 
     `using V [ σ ]ᵥ at W [ σ ]ᵥ `run M [ σ ]ᵤ finally (N [ extendₛ (extendₛ σ) ]ᵤ)
-  kernel K at V finally M [ σ ]ᵤ = 
+  kernel K at V finally M [ σ ]ᵤ        = 
     kernel (K [ σ ]ₖ) at (V [ σ ]ᵥ) finally (M [ (extendₛ (extendₛ σ)) ]ᵤ)
 
   -- Kernel

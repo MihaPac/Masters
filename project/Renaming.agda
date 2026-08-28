@@ -45,36 +45,41 @@ interleaved mutual
   _[_]ₖᵣ : ∀{Γ Γ' X} → Γ' ⊢K: X → Ren Γ Γ' → Γ ⊢K: X
 
   -- Value
-  var x [ ρ ]ᵥᵣ = var (ρ x)
+  var x [ ρ ]ᵥᵣ         = var (ρ x)
   sub-value V p [ ρ ]ᵥᵣ = sub-value (V [ ρ ]ᵥᵣ) p
-  ⟨⟩ [ ρ ]ᵥᵣ = ⟨⟩
-  ⟨ V , W ⟩ [ ρ ]ᵥᵣ = ⟨  V [ ρ ]ᵥᵣ , W [ ρ ]ᵥᵣ ⟩
-  funU M [ ρ ]ᵥᵣ = funU (M [ extdᵣ ρ ]ᵤᵣ)
-  funK K [ ρ ]ᵥᵣ = funK (K [ extdᵣ ρ ]ₖᵣ)
-  runner R [ ρ ]ᵥᵣ = runner λ op x → (R op x [ extdᵣ ρ ]ₖᵣ)
+  ⟨⟩ [ ρ ]ᵥᵣ            = ⟨⟩
+  ⟨ V , W ⟩ [ ρ ]ᵥᵣ     = ⟨  V [ ρ ]ᵥᵣ , W [ ρ ]ᵥᵣ ⟩
+  funU M [ ρ ]ᵥᵣ        = funU (M [ extdᵣ ρ ]ᵤᵣ)
+  funK K [ ρ ]ᵥᵣ        = funK (K [ extdᵣ ρ ]ₖᵣ)
+  runner R [ ρ ]ᵥᵣ      = runner λ op x → (R op x [ extdᵣ ρ ]ₖᵣ)
 
   -- User
-  sub-user M p [ ρ ]ᵤᵣ = sub-user (M [ ρ ]ᵤᵣ) p
-  return V [ ρ ]ᵤᵣ = return (V [ ρ ]ᵥᵣ)
-  (V · W) [ ρ ]ᵤᵣ = (V [ ρ ]ᵥᵣ) · (W [ ρ ]ᵥᵣ)
-  opᵤ op p V M [ ρ ]ᵤᵣ = opᵤ op p (V [ ρ ]ᵥᵣ) (M [ extdᵣ ρ ]ᵤᵣ)
-  `let M `in N [ ρ ]ᵤᵣ = `let M [ ρ ]ᵤᵣ `in (N [ extdᵣ ρ ]ᵤᵣ )
-  (match M `with N) [ ρ ]ᵤᵣ = 
+  sub-user M p [ ρ ]ᵤᵣ                   = 
+    sub-user (M [ ρ ]ᵤᵣ) p
+  return V [ ρ ]ᵤᵣ                       = 
+    return (V [ ρ ]ᵥᵣ)
+  (V · W) [ ρ ]ᵤᵣ                        = 
+    (V [ ρ ]ᵥᵣ) · (W [ ρ ]ᵥᵣ)
+  opᵤ op p V M [ ρ ]ᵤᵣ                   = 
+    opᵤ op p (V [ ρ ]ᵥᵣ) (M [ extdᵣ ρ ]ᵤᵣ)
+  `let M `in N [ ρ ]ᵤᵣ                   = 
+    `let M [ ρ ]ᵤᵣ `in (N [ extdᵣ ρ ]ᵤᵣ )
+  (match M `with N) [ ρ ]ᵤᵣ              = 
     match M [ ρ ]ᵥᵣ `with (N [ extdᵣ (extdᵣ ρ) ]ᵤᵣ)
   `using R at M `run K finally N [ ρ ]ᵤᵣ = 
     `using R [ ρ ]ᵥᵣ at M [ ρ ]ᵥᵣ 
       `run K [ ρ ]ᵤᵣ finally (N [ extdᵣ (extdᵣ ρ) ]ᵤᵣ)
-  kernel K at M finally N [ ρ ]ᵤᵣ = 
+  kernel K at M finally N [ ρ ]ᵤᵣ        = 
     kernel K [ ρ ]ₖᵣ at M [ ρ ]ᵥᵣ finally (N [ extdᵣ (extdᵣ ρ) ]ᵤᵣ)
 
   -- Kernel
-  sub-kernel K p [ ρ ]ₖᵣ = sub-kernel (K [ ρ ]ₖᵣ) p
-  return V [ ρ ]ₖᵣ = return (V [ ρ ]ᵥᵣ)
-  (V · W) [ ρ ]ₖᵣ = (V [ ρ ]ᵥᵣ) · (W [ ρ ]ᵥᵣ)
-  `let K `in L [ ρ ]ₖᵣ = `let K [ ρ ]ₖᵣ `in (L [ extdᵣ ρ ]ₖᵣ)
-  match V `with K [ ρ ]ₖᵣ = match V [ ρ ]ᵥᵣ `with (K [ extdᵣ (extdᵣ ρ) ]ₖᵣ)
-  opₖ op x V K [ ρ ]ₖᵣ = opₖ op x (V [ ρ ]ᵥᵣ) (K [ extdᵣ ρ ]ₖᵣ)
-  getenv K [ ρ ]ₖᵣ = getenv (K [ extdᵣ ρ ]ₖᵣ)
-  setenv V K [ ρ ]ₖᵣ = setenv (V [ ρ ]ᵥᵣ) (K [ ρ ]ₖᵣ)
-  user M `with K [ ρ ]ₖᵣ = user M [ ρ ]ᵤᵣ `with (K [ extdᵣ ρ ]ₖᵣ)
- 
+  sub-kernel K p [ ρ ]ₖᵣ  = sub-kernel (K [ ρ ]ₖᵣ) p
+  return V [ ρ ]ₖᵣ        = return (V [ ρ ]ᵥᵣ)
+  (V · W) [ ρ ]ₖᵣ         = (V [ ρ ]ᵥᵣ) · (W [ ρ ]ᵥᵣ)
+  `let K `in L [ ρ ]ₖᵣ    = `let K [ ρ ]ₖᵣ `in (L [ extdᵣ ρ ]ₖᵣ)
+  match V `with K [ ρ ]ₖᵣ = match V [ ρ ]ᵥᵣ `with 
+    (K [ extdᵣ (extdᵣ ρ) ]ₖᵣ)
+  opₖ op x V K [ ρ ]ₖᵣ     = opₖ op x (V [ ρ ]ᵥᵣ) (K [ extdᵣ ρ ]ₖᵣ)
+  getenv K [ ρ ]ₖᵣ        = getenv (K [ extdᵣ ρ ]ₖᵣ)
+  setenv V K [ ρ ]ₖᵣ      = setenv (V [ ρ ]ᵥᵣ) (K [ ρ ]ₖᵣ)
+  user M `with K [ ρ ]ₖᵣ  = user M [ ρ ]ᵤᵣ `with (K [ extdᵣ ρ ]ₖᵣ)

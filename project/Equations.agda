@@ -217,7 +217,8 @@ interleaved mutual
       → (V : Γ ⊢V: X)
       → (N : Γ ∷ X ∷ gnd C ⊢U: Y ! Σ')
       -----------------------------------
-      → Γ ⊢U `using R at W `run return V finally N ≡ (N [ (idₛ ∷ₛ V) ∷ₛ W ]ᵤ)
+      → Γ ⊢U `using R at W `run return V finally N ≡ 
+        (N [ (idₛ ∷ₛ V) ∷ₛ W ]ᵤ)
 
     using-run-finally-beta-op :
       {Σ Σ' : Sig} {C : KState} {X Y : VType}
@@ -231,9 +232,12 @@ interleaved mutual
       -----------------------------------
       → Γ ⊢U `using runner R at W `run (opᵤ op x V M) finally N
         ≡ kernel R op x [ idₛ ∷ₛ V ]ₖ at W finally 
-            (`using (runner (λ op' x' → R op' x' [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ ))
-              at var here `run M [ wkᵣ ]ᵤᵣ finally 
-                (N [ extdᵣ (extdᵣ (wkᵣ ∘ᵣ wkᵣ)) ]ᵤᵣ))
+            (`using 
+              (runner (λ op' x' → R op' x' [ extdᵣ (wkᵣ ∘ᵣ wkᵣ) ]ₖᵣ ))
+            at 
+              var here `run M [ wkᵣ ]ᵤᵣ 
+            finally 
+              (N [ extdᵣ (extdᵣ (wkᵣ ∘ᵣ wkᵣ)) ]ᵤᵣ))
 
     kernel-at-finally-beta-return : {X Y : VType}
       {Σ : Sig} {C : KState}

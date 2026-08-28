@@ -70,30 +70,42 @@ mutual
 -- Denotation of contexts are runtime environments
 
 ⟦_⟧-ctx : Ctx → Set
-⟦ [] ⟧-ctx = ⊤
+⟦ [] ⟧-ctx    = ⊤
 ⟦ Γ ∷ X ⟧-ctx = ⟦ Γ ⟧-ctx × ⟦ X ⟧v
 
 -- Lookup a variable in a runtime environment
-lookup : ∀ {Γ X} (x : X ∈ Γ) → ⟦ Γ ⟧-ctx → ⟦ X ⟧v
+lookup : ∀ {Γ X} (_ : X ∈ Γ) → ⟦ Γ ⟧-ctx → ⟦ X ⟧v
 lookup here η = proj₂ η
 lookup (there x) η = lookup x (proj₁ η)
 
 mutual
   -- Denotation of value subtyping
   coerceᵥ : ∀ {X Y} → X ⊑ᵥ Y → ⟦ X ⟧v → ⟦ Y ⟧v
-  coerceᵥ ⊑ᵥ-ground A = A
-  coerceᵥ (⊑ᵥ-product p q) (X , Y) = (coerceᵥ p X , coerceᵥ q Y)
-  coerceᵥ (⊑ᵥ-Ufun p q) X = λ X' → coerceᵤ q (X (coerceᵥ p X'))
-  coerceᵥ (⊑ᵥ-Kfun p q) X = λ X' → coerceₖ q (X (coerceᵥ p X'))
-  coerceᵥ (⊑ᵥ-runner p q refl) R = λ op x param C → coerce-tree q (R op (coerce-signature x p) param C)
+  coerceᵥ ⊑ᵥ-ground a              = 
+    a
+  coerceᵥ (⊑ᵥ-product p q) (x , y) = 
+    (coerceᵥ p x , coerceᵥ q y)
+  coerceᵥ (⊑ᵥ-Ufun p q) fᵤ         = 
+    λ x → coerceᵤ q (fᵤ (coerceᵥ p x))
+  coerceᵥ (⊑ᵥ-Kfun p q) fₖ         = 
+    λ x → coerceₖ q (fₖ (coerceᵥ p x))
+  coerceᵥ (⊑ᵥ-runner p q refl) r   = 
+    λ op x param c → 
+      coerce-tree q (r op (coerce-signature x p) param c)
   
   -- Denotation of user computation subtyping
   coerceᵤ : ∀ {Xᵤ Yᵤ} → Xᵤ ⊑ᵤ Yᵤ → ⟦ Xᵤ ⟧u → ⟦ Yᵤ ⟧u
-  coerceᵤ (⊑ᵤ-user p q) M = coerce-tree q (bind-tree (leaf ∘ coerceᵥ p) M)
+  coerceᵤ (⊑ᵤ-user p q) xᵤ = 
+    coerce-tree 
+      q 
+      (bind-tree (leaf ∘ coerceᵥ p) xᵤ)
 
   -- Denotation of kernel computation subtyping
   coerceₖ : ∀ {Xₖ Yₖ} → Xₖ ⊑ₖ Yₖ → ⟦ Xₖ ⟧k → ⟦ Yₖ ⟧k
-  coerceₖ (⊑ₖ-kernel p q refl) K = λ C → coerce-tree q (bind-tree (leaf ∘ λ {(X , C) → coerceᵥ p X , C}) (K C)) 
+  coerceₖ (⊑ₖ-kernel p q refl) xₖ = λ c → 
+    coerce-tree 
+      q 
+      (bind-tree (leaf ∘ λ {(X , c) → coerceᵥ p X , c}) (xₖ c)) 
   --(map-tree (λ {(X , C) → (coerceᵥ p X) , C}) (K L))
 
 
@@ -102,42 +114,88 @@ mutual
 
 
   ⟦_⟧-value : ∀ {Γ X} → (Γ ⊢V: X) → ⟦ Γ ⟧-ctx → ⟦ X ⟧v
-  ⟦ var x ⟧-value η = lookup x η
+  ⟦ var x ⟧-value η         = lookup x η
   ⟦ sub-value V p ⟧-value η = coerceᵥ p (⟦ V ⟧-value η)
-  ⟦ ⟨⟩ ⟧-value η = tt
-  ⟦ ⟨ V , W ⟩ ⟧-value η = (⟦ V ⟧-value η) , (⟦ W ⟧-value η)
-  ⟦ funU M ⟧-value η = λ X → ⟦ M ⟧-user (η , X)
-  ⟦ funK K ⟧-value η = λ X → ⟦ K ⟧-kernel (η , X)
-  ⟦ runner R ⟧-value η = λ op x param → ⟦ (R op x) ⟧-kernel (η , param)
+  ⟦ ⟨⟩ ⟧-value η            = tt
+  ⟦ ⟨ V , W ⟩ ⟧-value η     = (⟦ V ⟧-value η) , (⟦ W ⟧-value η)
+  ⟦ funU M ⟧-value η        = λ X → ⟦ M ⟧-user (η , X)
+  ⟦ funK K ⟧-value η        = λ X → ⟦ K ⟧-kernel (η , X)
+  ⟦ runner R ⟧-value η      = λ op x param → 
+    ⟦ (R op x) ⟧-kernel (η , param)
 
   apply-runner : ∀ {Σ Σ' C X} → Runner Σ Σ' C → UComp Σ X → KComp Σ' C X
   apply-runner R (leaf x) = λ C → leaf (x , C)
-  apply-runner R (node op x param κ) = bind-kernel ((apply-runner R) ∘ κ) (R op x param)
+  apply-runner R (node op x param κ) = 
+    bind-kernel 
+      ((apply-runner R) ∘ κ) 
+      (R op x param)
 
   kernel-to-user : ∀ {Σ X Y C} → KComp Σ C X → C → (X × C → UComp Σ Y) → UComp Σ Y
   kernel-to-user K C f = bind-user f (K C)
 
   ⟦_⟧-user : ∀ {Γ Xᵤ} → (Γ ⊢U: Xᵤ) → ⟦ Γ ⟧-ctx → ⟦ Xᵤ ⟧u
-  ⟦ sub-user M p ⟧-user η = coerceᵤ p (⟦ M ⟧-user η)
-  ⟦ return V ⟧-user η = leaf (⟦ V ⟧-value η)
-  ⟦ V · W ⟧-user η = ⟦ V ⟧-value η (⟦ W ⟧-value η)
-  ⟦ opᵤ op x V M ⟧-user η = node op x (⟦ V ⟧-value η) λ res → ⟦ M ⟧-user (η , res)
-  ⟦ `let M `in N ⟧-user η = bind-user (λ X → ⟦ N ⟧-user (η , X)) (⟦ M ⟧-user η)
-  ⟦ match V `with M ⟧-user η = ⟦ M ⟧-user ((η , (proj₁ (⟦ V ⟧-value η))) , (proj₂ (⟦ V ⟧-value η)))
+  ⟦ sub-user M p ⟧-user η                   = 
+    coerceᵤ p (⟦ M ⟧-user η)
+  ⟦ return V ⟧-user η                       = 
+    leaf (⟦ V ⟧-value η)
+  ⟦ V · W ⟧-user η                          = 
+    ⟦ V ⟧-value η (⟦ W ⟧-value η)
+  ⟦ opᵤ op x V M ⟧-user η                   = 
+    node 
+      op 
+      x 
+      (⟦ V ⟧-value η) 
+      λ res → ⟦ M ⟧-user (η , res)
+  ⟦ `let M `in N ⟧-user η                   = 
+    bind-user 
+      (λ X → ⟦ N ⟧-user (η , X)) 
+      (⟦ M ⟧-user η)
+  ⟦ match V `with M ⟧-user η                = 
+    ⟦ M ⟧-user 
+      ((η , 
+      (proj₁ (⟦ V ⟧-value η))) , 
+      (proj₂ (⟦ V ⟧-value η)))
   ⟦ `using R at C `run M finally N ⟧-user η =
     bind-user (λ { (X , C') → ⟦ N ⟧-user ((η , X) , C')}) 
-      (apply-runner (⟦ R ⟧-value η) (⟦ M ⟧-user η) (⟦ C ⟧-value η)) 
-  ⟦ kernel K at C finally M ⟧-user η = 
+      (apply-runner 
+        (⟦ R ⟧-value η) 
+        (⟦ M ⟧-user η) 
+        (⟦ C ⟧-value η)) 
+  ⟦ kernel K at C finally M ⟧-user η        = 
     bind-user (λ {(X , C) → ⟦ M ⟧-user ((η , X) , C)}) 
       (⟦ K ⟧-kernel η (⟦ C ⟧-value η))
 
   ⟦_⟧-kernel : ∀ {Γ K} → (Γ ⊢K: K) → ⟦ Γ ⟧-ctx → ⟦ K ⟧k
-  ⟦ sub-kernel K p ⟧-kernel η = coerceₖ p (⟦ K ⟧-kernel η)
-  ⟦ return V ⟧-kernel η = λ C → leaf ((⟦ V ⟧-value η) , C)
-  ⟦ V · W ⟧-kernel η = ⟦ V ⟧-value η (⟦ W ⟧-value η)
-  ⟦ `let K `in L ⟧-kernel η = bind-kernel (λ X → ⟦ L ⟧-kernel (η , X)) (⟦ K ⟧-kernel η)
-  ⟦ match V `with K ⟧-kernel η = ⟦ K ⟧-kernel ((η , proj₁ (⟦ V ⟧-value η)) , proj₂ (⟦ V ⟧-value η))
-  ⟦ opₖ op x V K ⟧-kernel η = λ C → node op x (⟦ V ⟧-value η) (λ res → ⟦ K ⟧-kernel (η , res) C)
-  ⟦ getenv K ⟧-kernel η = λ C → ⟦ K ⟧-kernel (η , C) C
-  ⟦ setenv V K ⟧-kernel η _ = ⟦ K ⟧-kernel η (⟦ V ⟧-value η)
-  ⟦ user M `with K ⟧-kernel η = λ C → bind-user (λ X → ⟦ K ⟧-kernel (η , X) C) (⟦ M ⟧-user η)
+  ⟦ sub-kernel K p ⟧-kernel η  = 
+    coerceₖ p (⟦ K ⟧-kernel η)
+  ⟦ return V ⟧-kernel η        = 
+    λ C → 
+      leaf ((⟦ V ⟧-value η) , C)
+  ⟦ V · W ⟧-kernel η           = 
+    ⟦ V ⟧-value η (⟦ W ⟧-value η)
+  ⟦ `let K `in L ⟧-kernel η    = 
+    bind-kernel 
+      (λ X → ⟦ L ⟧-kernel (η , X)) 
+      (⟦ K ⟧-kernel η)
+  ⟦ match V `with K ⟧-kernel η = 
+    ⟦ K ⟧-kernel 
+    ((η , proj₁ (⟦ V ⟧-value η)) , 
+    proj₂ (⟦ V ⟧-value η))
+  ⟦ opₖ op x V K ⟧-kernel η    = 
+    λ C → 
+      node 
+        op 
+        x 
+        (⟦ V ⟧-value η)
+        (λ res → ⟦ K ⟧-kernel (η , res) C)
+  ⟦ getenv K ⟧-kernel η        = 
+    λ C → 
+      ⟦ K ⟧-kernel (η , C) C
+  ⟦ setenv V K ⟧-kernel η _    = 
+    ⟦ K ⟧-kernel η 
+    (⟦ V ⟧-value η)
+  ⟦ user M `with K ⟧-kernel η  = 
+    λ C → 
+      bind-user 
+        (λ X → ⟦ K ⟧-kernel (η , X) C) 
+        (⟦ M ⟧-user η)

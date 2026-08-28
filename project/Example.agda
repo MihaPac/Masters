@@ -16,18 +16,18 @@ open import Trees
 -- booleans and natural numbers
 
 data ToyBase : Set where
-  bol : ToyBase
+  boo : ToyBase
   nat : ToyBase
 
 ⟦_⟧toy : ToyBase → Set
-⟦ bol ⟧toy = Bool
+⟦ boo ⟧toy = Bool
 ⟦ nat ⟧toy = ℕ
 
 toyGround : GTypes
 toyGround = record { BaseType = ToyBase ; ⟦_⟧b = ⟦_⟧toy }
 
 -- In our toy language we have two operations:
--- flip : unit → bol (idea: it returns a random bit)
+-- flip : unit → boo (idea: it returns a random bit)
 -- print : nat → unit (idea: it prints a number to standard output)
 
 data ToyOp : Set where
@@ -41,7 +41,7 @@ toyParam flip =  unit
 toyParam print = base nat
 
 toyResult : ToyOp → GType toyGround
-toyResult flip =  base bol
+toyResult flip =  base boo
 toyResult print = unit
 
 toyOps : Ops toyGround
@@ -54,8 +54,8 @@ module _ where
   open Terms toyGround toyOps
 
   -- A user computation in context with one variable of type nat
-  -- Written in human form: x : nat, y : bol ⊢ᵤ print (x, _. return ⟨⟩)
-  rattle : [] ∷ gnd (base nat) ∷ gnd (base bol) ⊢U: (gnd unit ! λ { flip → false ; print → true})
+  -- Written in human form: x : nat, y : boo ⊢ᵤ print (x, _. return ⟨⟩)
+  rattle : [] ∷ gnd (base nat) ∷ gnd (base boo) ⊢U: (gnd unit ! λ { flip → false ; print → true})
   rattle = opᵤ print refl (var (there here)) (return ⟨⟩)
 
   -- Let us compute the result of running cow in the runtime environment {x : 42, y : false}
@@ -65,11 +65,57 @@ module _ where
   -- Normalization of rattle (Ctrl-c Ctrl-n in Emacs)
   -- Result: node print refl 42 (λ res → leaf tt)
 
-  -- Written in human form: x : nat, y : bol ⊢ᵤ flip (⟨⟩, c . print (42, _ . return c))
-  box : [] ∷ gnd (base nat) ∷ gnd (base bol) ⊢U: (gnd (base bol) ! λ { flip → true ; print → true})
+  -- Written in human form: x : nat, y : boo ⊢ᵤ flip (⟨⟩, c . print (42, _ . return c))
+  box : [] ∷ gnd (base nat) ∷ gnd (base boo) ⊢U: (gnd (base boo) ! λ { flip → true ; print → true})
   box = opᵤ flip refl ⟨⟩ (
     opᵤ print refl (var (there (there here))) (
       return (var (there here))))
 
   crank = ⟦ box ⟧-user ((tt , 42) , false)
   -- Normalize crank: node flip refl tt (λ c → node print refl 42 (λ _ → leaf c))
+
+
+
+  Sigma : Ops.Sig toyOps
+  Sigma flip = true
+  Sigma print = false
+
+  doubler : [] ∷ gnd unit ⊢V: (Sigma ⇒ Sigma , unit)
+  doubler = runner λ {flip x → opₖ flip x ⟨⟩ (opₖ flip x ⟨⟩ (return (var here)))
+                ; print x → return ⟨⟩ }
+
+  one : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
+  one = opᵤ flip refl ⟨⟩ (return (var here))
+
+  onetwo = ⟦ one ⟧-user (tt , tt)
+
+  two : [] ∷ gnd unit ⊢U: (gnd unit ! Sigma)
+  two = `using doubler at ⟨⟩ `run one finally (return ⟨⟩)
+
+  twotwo = ⟦ two ⟧-user (tt , tt)
+
+  three : [] ∷ gnd unit ⊢U: (gnd unit ! Sigma)
+  three = `using doubler at ⟨⟩ `run two finally (return ⟨⟩)
+
+  threetwo = ⟦ three ⟧-user (tt , tt)
+
+
+-- onetwo - node flip refl tt (λ res → leaf tt)
+-- twotwo - node flip refl tt (λ res → node flip refl tt (λ res₁ → leaf tt))
+-- threetwo - node flip refl tt (λ res →
+--    node flip refl tt
+--    (λ res₁ →
+--        node flip refl tt (λ res₂ → node flip refl tt (λ res₃ → leaf tt))))
+
+{-
+  paw1 : [] ∷ gnd (base nat) ∷ gnd (base boo) ⊢U: (gnd unit ! Sigma)
+  paw1 = opᵤ print refl (var (there here)) (return ⟨⟩)
+
+  paw2 : (([] ∷ gnd (base nat) ∷ gnd (base boo)) ∷ gnd unit) ∷
+    gnd unit ⊢U: ({!   !} ! Sigma')
+  paw2 = opᵤ flip {!   !} {!   !} {!   !}
+
+
+  cat : {!   !} ⊢U: ({!   !} ! Sigma')
+  cat = `using doubler at {!   !} `run paw1 finally paw2
+  -}
