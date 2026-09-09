@@ -29,9 +29,12 @@ open import Monads G O
 
 mutual
 
-    valid-V : ∀ {Γ : Ctx} {X : VType} {V W : Γ ⊢V: X} → (eq-V : Γ ⊢V V ≡ W) → ∀ η → ⟦ V ⟧-value η ≡ ⟦ W ⟧-value η
-    valid-U : ∀ {Γ : Ctx} {Xᵤ : UType} {M N : Γ ⊢U: Xᵤ} → (eq-M : Γ ⊢U M ≡ N) → ∀ η → ⟦ M ⟧-user η ≡ ⟦ N ⟧-user η
-    valid-K : ∀ {Γ : Ctx} {Xₖ : KType} {K L : Γ ⊢K: Xₖ} → (eq-K : Γ ⊢K K ≡ L) → ∀ η → ⟦ K ⟧-kernel η ≡ ⟦ L ⟧-kernel η
+    valid-V : ∀ {Γ : Ctx} {X : VType} {V W : Γ ⊢V: X} → 
+        (eq-V : Γ ⊢V V ≡ W) → ∀ η → ⟦ V ⟧-value η ≡ ⟦ W ⟧-value η
+    valid-U : ∀ {Γ : Ctx} {Xᵤ : UType} {M N : Γ ⊢U: Xᵤ} → 
+        (eq-M : Γ ⊢U M ≡ N) → ∀ η → ⟦ M ⟧-user η ≡ ⟦ N ⟧-user η
+    valid-K : ∀ {Γ : Ctx} {Xₖ : KType} {K L : Γ ⊢K: Xₖ} → 
+        (eq-K : Γ ⊢K K ≡ L) → ∀ η → ⟦ K ⟧-kernel η ≡ ⟦ L ⟧-kernel η
 
     valid-V refl η = Eq.refl
     valid-V (sym eq-V) η = Eq.sym (valid-V eq-V η)
