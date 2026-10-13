@@ -89,13 +89,13 @@ module _ where
 
   onetwo = ⟦ one ⟧-user (tt , tt)
 
-  two : [] ∷ gnd unit ⊢U: (gnd unit ! Sigma)
-  two = `using doubler at ⟨⟩ `run one finally (return ⟨⟩)
+  two : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
+  two = `using doubler at ⟨⟩ `run one finally (return (var (there here)))
 
   twotwo = ⟦ two ⟧-user (tt , tt)
 
-  three : [] ∷ gnd unit ⊢U: (gnd unit ! Sigma)
-  three = `using doubler at ⟨⟩ `run two finally (return ⟨⟩)
+  three : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
+  three = `using doubler at ⟨⟩ `run two finally (return (var (there here)))
 
   threetwo = ⟦ three ⟧-user (tt , tt)
 
