@@ -23,8 +23,8 @@ interleaved mutual
     -- equivalence rules
 
     refl : {X : VType} {V : Γ ⊢V: X}
-          -----------------------------------
-          → Γ ⊢V V ≡ V
+      -----------------------------------
+      → Γ ⊢V V ≡ V
 
     sym : {X : VType} {V V' : Γ ⊢V: X}
       → Γ ⊢V V ≡ V'
