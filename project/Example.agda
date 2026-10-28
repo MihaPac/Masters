@@ -84,38 +84,42 @@ module _ where
   doubler = runner λ {flip x → opₖ flip x ⟨⟩ (opₖ flip x ⟨⟩ (return (var here)))
                 ; print x → return ⟨⟩ }
 
+  -- Koda, kot je v magistrskem delu
   one : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
   one = opᵤ flip refl ⟨⟩ (return (var here))
 
   onetwo = ⟦ one ⟧-user (tt , tt)
 
-  two : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
-  two = `using doubler at ⟨⟩ `run one finally (return (var (there here)))
+  two : [] ∷ gnd unit ⊢U: (gnd unit ! Sigma)
+  two = `using doubler at ⟨⟩ `run one finally (return ⟨⟩)
 
   twotwo = ⟦ two ⟧-user (tt , tt)
 
-  three : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
-  three = `using doubler at ⟨⟩ `run two finally (return (var (there here)))
+  -- Koda, kot bi morala delovati
+  one' : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
+  one' = opᵤ flip refl ⟨⟩ (return (var here))
 
-  threetwo = ⟦ three ⟧-user (tt , tt)
+  onetwo' = ⟦ one ⟧-user (tt , tt)
 
+  two' : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
+  two' = `using doubler at ⟨⟩ `run one finally (return (var (there here)))
 
--- onetwo - node flip refl tt (λ res → leaf tt)
+  twotwo' = ⟦ two' ⟧-user (tt , tt)
+
+  three' : [] ∷ gnd unit ⊢U: (gnd (base boo) ! Sigma)
+  three' = `using doubler at ⟨⟩ `run two' finally (return (var (there here)))
+
+  threetwo' = ⟦ three' ⟧-user (tt , tt)
+
+-- Če se normalizira koda s ctrl+n:
+
+-- onetwo - node flip refl tt (λ res → leaf res) 
 -- twotwo - node flip refl tt (λ res → node flip refl tt (λ res₁ → leaf tt))
--- threetwo - node flip refl tt (λ res →
+
+-- onetwo' - node flip refl tt (λ res → leaf tt)
+-- twotwo' - node flip refl tt (λ res → node flip refl tt (λ res₁ → leaf tt))
+-- threetwo' - node flip refl tt (λ res →
 --    node flip refl tt
 --    (λ res₁ →
 --        node flip refl tt (λ res₂ → node flip refl tt (λ res₃ → leaf tt))))
 
-{-
-  paw1 : [] ∷ gnd (base nat) ∷ gnd (base boo) ⊢U: (gnd unit ! Sigma)
-  paw1 = opᵤ print refl (var (there here)) (return ⟨⟩)
-
-  paw2 : (([] ∷ gnd (base nat) ∷ gnd (base boo)) ∷ gnd unit) ∷
-    gnd unit ⊢U: ({!   !} ! Sigma')
-  paw2 = opᵤ flip {!   !} {!   !} {!   !}
-
-
-  cat : {!   !} ⊢U: ({!   !} ! Sigma')
-  cat = `using doubler at {!   !} `run paw1 finally paw2
-  -}
